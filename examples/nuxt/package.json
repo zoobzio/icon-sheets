@@ -1,5 +1,5 @@
 {
-  "name": "@iconic/example-nuxt",
+  "name": "@icon-sheets/example-nuxt",
   "private": true,
   "type": "module",
   "scripts": {
@@ -9,8 +9,8 @@
     "preview": "nuxi preview"
   },
   "dependencies": {
-    "@iconic/nuxt": "workspace:*",
-    "@iconic/iconic": "workspace:*",
+    "@icon-sheets/nuxt": "workspace:*",
+    "@icon-sheets/icon-sheets": "workspace:*",
     "nuxt": "^4.4.6",
     "vue": "^3.5.35"
   },

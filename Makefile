@@ -1,4 +1,4 @@
-# iconic monorepo orchestration.
+# icon-sheets monorepo orchestration.
 #
 # Thin wrappers over the pnpm workspace scripts (package.json stays the source
 # of truth) plus a few targets that span the whole repo: cleaning build output

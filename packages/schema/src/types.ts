@@ -1,14 +1,14 @@
 import type { IconifyIcon } from "@iconify/types";
 
-// The Iconify spec's single-icon type is re-exported as-is: iconic's contract is
+// The Iconify spec's single-icon type is re-exported as-is: icon-sheets's contract is
 // a flat map of resolved icon definition literals in Iconify format, so this is
 // the one spec type the runtime contract is built from. The IconifyJSON
 // collection format — the *source* documents — belongs to the build layer
-// (`@iconic/iconify`), never the runtime, so it is not re-exported here.
+// (`@icon-sheets/iconify`), never the runtime, so it is not re-exported here.
 export type { IconifyIcon };
 
 /**
- * The identity and discovery metadata every iconic document carries: a required
+ * The identity and discovery metadata every icon-sheets document carries: a required
  * `id` (the stable key a catalog retrieves by) and `name` (display), plus
  * optional `description` and `tags` a picker renders and a catalog query
  * filters on.

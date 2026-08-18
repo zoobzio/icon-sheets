@@ -42,6 +42,6 @@ export const serialize = (value: unknown, indent: string): string => {
     return `{\n${body},\n${indent}}`;
   }
   throw new Error(
-    `@iconic/iconify: cannot serialize a ${typeof value} into the generated config`,
+    `@icon-sheets/iconify: cannot serialize a ${typeof value} into the generated config`,
   );
 };

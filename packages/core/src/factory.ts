@@ -1,5 +1,5 @@
 import { equals, keys } from "objectively";
-import { defineSchema } from "@iconic/schema";
+import { defineSchema } from "@icon-sheets/schema";
 import type {
   Alias,
   Contract,
@@ -8,10 +8,10 @@ import type {
   Overrides,
   Schema,
   Set,
-} from "@iconic/schema";
-import { clone, copy, merge } from "@iconic/utils";
+} from "@icon-sheets/schema";
+import { clone, copy, merge } from "@icon-sheets/utils";
 
-import type { Config, Iconic, Options } from "./types";
+import type { Config, IconSheets, Options } from "./types";
 import {
   InvalidContractError,
   InvalidOverridesError,
@@ -21,8 +21,8 @@ import {
 } from "./error";
 
 /**
- * Builds the runtime {@link Iconic} service over a state container, for any
- * complete contract — authored via {@link defineIconic}, or machine-built (a
+ * Builds the runtime {@link IconSheets} service over a state container, for any
+ * complete contract — authored via {@link defineIconSheets}, or machine-built (a
  * `configure`-widened preset, a merged contract) whose icons only the runtime
  * schema can rule on. The contract is validated against its own shape up front
  * either way.
@@ -39,10 +39,10 @@ import {
  * @param config - The caller-owned container: active contract and override.
  * @param options - Read/write middleware over `config`.
  */
-export const makeIconic = <C extends Contract>(
+export const makeIconSheets = <C extends Contract>(
   config: Config<C>,
   options: Options<C> = {},
-): Iconic<C> => {
+): IconSheets<C> => {
   /**
    * The active state, fronted by get/set middleware. Reads pull the raw value
    * from the container and pipe it through the matching `options.get`

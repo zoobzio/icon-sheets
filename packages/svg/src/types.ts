@@ -1,4 +1,4 @@
-import type { Alias, Contract, IconifyIcon } from "@iconic/schema";
+import type { Alias, Contract, IconifyIcon } from "@icon-sheets/schema";
 
 /**
  * The subset of the core service a sprite reads: pass the service itself —

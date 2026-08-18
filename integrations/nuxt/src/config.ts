@@ -1,8 +1,8 @@
-import type { Identity } from "@iconic/iconic";
+import type { Identity } from "@icon-sheets/icon-sheets";
 
 /**
  * An alias map authored as icon *refs* — `home: "lucide:home"`, or
- * `home: "$/host/path"` — the build-layer input `@iconic/iconify` resolves into
+ * `home: "$/host/path"` — the build-layer input `@icon-sheets/iconify` resolves into
  * icon literals.
  */
 export type RefIcons = Record<string, string>;
@@ -19,7 +19,7 @@ export type RefSet = Identity & { icons: RefIcons };
  * them against the Iconify collections at build time and emits the flat contract
  * the runtime carries. `id` / `name` default when omitted.
  */
-export interface NuxtIconicConfig {
+export interface NuxtIconSheetsConfig {
   /** The contract's identity id. Defaults to `"app"`. */
   id?: string;
 
@@ -43,7 +43,7 @@ export interface NuxtIconicConfig {
    * the browser only ever talks to the app's own origin, so the token never
    * reaches the client.
    *
-   * Auth is a single env var, `NUXT_ICONIC_TOKEN`, sent as a bearer token. The
+   * Auth is a single env var, `NUXT_ICON_SHEETS_TOKEN`, sent as a bearer token. The
    * same variable is read from `process.env` at build (to resolve refs from a
    * private icon source) and from `runtimeConfig` at runtime (to load sets) — so
    * the consumer sets one env var and it works for both. `headers` carries any
@@ -59,21 +59,21 @@ export interface NuxtIconicConfig {
 }
 
 /**
- * Identity helper that types a Nuxt iconic configuration.
+ * Identity helper that types a Nuxt icon-sheets configuration.
  *
- * @param config - The Nuxt iconic configuration.
+ * @param config - The Nuxt icon-sheets configuration.
  * @returns The same config.
  */
-export const defineNuxtIconicConfig = (
-  config: NuxtIconicConfig,
-): NuxtIconicConfig => config;
+export const defineNuxtIconSheetsConfig = (
+  config: NuxtIconSheetsConfig,
+): NuxtIconSheetsConfig => config;
 
 declare module "@nuxt/schema" {
   interface NuxtConfig {
-    iconic?: NuxtIconicConfig;
+    iconSheets?: NuxtIconSheetsConfig;
   }
 
   interface NuxtOptions {
-    iconic?: NuxtIconicConfig;
+    iconSheets?: NuxtIconSheetsConfig;
   }
 }

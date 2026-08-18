@@ -1,5 +1,5 @@
 {
-  "name": "@iconic/catalog",
+  "name": "@icon-sheets/catalog",
   "version": "0.1.0",
   "type": "module",
   "main": "./.dist/index.mjs",
@@ -21,7 +21,7 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@iconic/schema": "workspace:*",
+    "@icon-sheets/schema": "workspace:*",
     "objectively": "^0.1.1"
   }
 }

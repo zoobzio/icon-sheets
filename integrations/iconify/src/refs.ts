@@ -22,14 +22,14 @@ export const parseRef = (alias: string, raw: string): ParsedRef => {
       return { scheme: "url", url: new URL(`https://${rest}`) };
     } catch {
       throw new Error(
-        `@iconic/iconify: alias "${alias}" has an unparseable URL ref "${raw}"`,
+        `@icon-sheets/iconify: alias "${alias}" has an unparseable URL ref "${raw}"`,
       );
     }
   }
   const parsed = stringToIcon(raw);
   if (!parsed || !parsed.prefix || !parsed.name) {
     throw new Error(
-      `@iconic/iconify: alias "${alias}" has an unparseable ref "${raw}" — expected "prefix:name" or "$/host/path"`,
+      `@icon-sheets/iconify: alias "${alias}" has an unparseable ref "${raw}" — expected "prefix:name" or "$/host/path"`,
     );
   }
   return {

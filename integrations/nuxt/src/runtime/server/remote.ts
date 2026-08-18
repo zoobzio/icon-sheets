@@ -1,5 +1,5 @@
 /**
- * The remote catalog config the module writes into `runtimeConfig.iconic`: the
+ * The remote catalog config the module writes into `runtimeConfig.iconSheets`: the
  * origin the routes proxy to, static headers, and the bearer token (server-only,
  * filled from the shared env var at runtime).
  */

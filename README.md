@@ -1,11 +1,11 @@
-# iconic
+# icon-sheets
 
 A type-safe icon system that resolves [Iconify](https://iconify.design) icons
 into a flat contract of definition literals, switches between icon sets at
 runtime through a catalog, and renders them as optimized **SVG sprite sheets**,
 with framework integrations.
 
-iconic separates the **source** — the Iconify JSON collections icons are drawn
+icon-sheets separates the **source** — the Iconify JSON collections icons are drawn
 from, with their aliases and inherited transforms — from the **contract** the
 runtime carries. The build layer resolves each authored reference through the
 Iconify spec once, at build time, and emits a flat `alias → icon definition
@@ -29,15 +29,15 @@ their Iconify reference:
 }
 ```
 
-The `@iconic/iconify` build layer resolves every reference against the Iconify
+The `@icon-sheets/iconify` build layer resolves every reference against the Iconify
 collections — flattening alias chains, merging transforms, baking in
-collection-root defaults — and emits a **contract**: a plain `iconic.config.ts`
+collection-root defaults — and emits a **contract**: a plain `icon-sheets.config.ts`
 of resolved icon data, no collections retained.
 
 ```ts
-import { defineIconicConfig } from "@iconic/iconic/config";
+import { defineIconSheetsConfig } from "@icon-sheets/icon-sheets/config";
 
-export default defineIconicConfig({
+export default defineIconSheetsConfig({
   contract: {
     id: "app",
     name: "App Icons",
@@ -50,11 +50,11 @@ The runtime engine seeds a fresh state container from that config and resolves
 an alias to its effective icon — the user override, else the active contract:
 
 ```ts
-import { makeIconic } from "@iconic/iconic";
-import { useIconicConfig } from "@iconic/iconic/config";
-import config from "./iconic.config";
+import { makeIconSheets } from "@icon-sheets/icon-sheets";
+import { useIconSheetsConfig } from "@icon-sheets/icon-sheets/config";
+import config from "./icon-sheets.config";
 
-const icons = makeIconic(useIconicConfig(config));
+const icons = makeIconSheets(useIconSheetsConfig(config));
 
 icons.resolve("home"); // the stored { body, width, height } literal
 ```
@@ -77,7 +77,7 @@ elsewhere. Both `list` (discovery, filtered/paged, tag-aware) and `get`
 (retrieval, proven against the contract) behave identically:
 
 ```ts
-import { defineCatalog } from "@iconic/iconic/catalog";
+import { defineCatalog } from "@icon-sheets/icon-sheets/catalog";
 
 const catalog = defineCatalog(icons.schema, provider);
 const set = await catalog.get("sharp");
@@ -100,7 +100,7 @@ patches into the DOM in place after an `apply`; `sheet()` renders the whole
 sprite for build-time or SSR.
 
 ```ts
-import { defineSprite } from "@iconic/iconic/svg";
+import { defineSprite } from "@icon-sheets/icon-sheets/svg";
 
 const sprite = defineSprite(icons);
 sprite.href("home"); // "#home" — constant
@@ -109,23 +109,23 @@ sprite.sheet(); // the full <svg> sprite
 
 ## From Iconify JSON
 
-iconic draws from the Iconify JSON format directly, so any of the
+icon-sheets draws from the Iconify JSON format directly, so any of the
 [200k+ open-source icons](https://icon-sets.iconify.design) published as
-`@iconify-json/*` packages are a valid source. The `@iconic/iconify` generation
+`@iconify-json/*` packages are a valid source. The `@icon-sheets/iconify` generation
 package resolves references from those local packages, with an Iconify-API
 fallback, and can also fetch a single icon from a URL.
 
 ## Workspace
 
-| Directory                        | Contents                                                                                  |
-| -------------------------------- | ----------------------------------------------------------------------------------------- |
-| [`packages`](./packages)         | The library: the public [`iconic`](./packages/iconic) package and the internals behind it |
-| [`integrations`](./integrations) | Build and framework bridges — the `@iconic/iconify` generator and the Nuxt module         |
-| `examples`                       | Consuming apps demonstrating the pipeline (none yet — the bucket is reserved)             |
+| Directory                        | Contents                                                                                            |
+| -------------------------------- | --------------------------------------------------------------------------------------------------- |
+| [`packages`](./packages)         | The library: the public [`icon-sheets`](./packages/icon-sheets) package and the internals behind it |
+| [`integrations`](./integrations) | Build and framework bridges — the `@icon-sheets/iconify` generator and the Nuxt module              |
+| `examples`                       | Consuming apps demonstrating the pipeline (none yet — the bucket is reserved)                       |
 
-The internal packages: `@iconic/schema` (validation), `@iconic/core` (runtime
-service), `@iconic/catalog` (set discovery/retrieval), `@iconic/svg` (sprite),
-and `@iconic/utils` (helpers). Shared type guards and object helpers come from
+The internal packages: `@icon-sheets/schema` (validation), `@icon-sheets/core` (runtime
+service), `@icon-sheets/catalog` (set discovery/retrieval), `@icon-sheets/svg` (sprite),
+and `@icon-sheets/utils` (helpers). Shared type guards and object helpers come from
 the standalone [`objectively`](https://www.npmjs.com/package/objectively) package.
 
 ## Development

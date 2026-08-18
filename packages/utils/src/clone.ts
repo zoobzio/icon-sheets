@@ -1,6 +1,6 @@
 import { equals } from "objectively";
 
-import type { Contract } from "@iconic/schema";
+import type { Contract } from "@icon-sheets/schema";
 
 import { copy } from "./copy";
 

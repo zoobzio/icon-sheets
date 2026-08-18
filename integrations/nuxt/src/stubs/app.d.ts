@@ -1,14 +1,14 @@
 // Typecheck-only stub for the Nuxt `#app` virtual module.
 
 /**
- * Runtime hook signatures. Augmented by the iconic runtime via
+ * Runtime hook signatures. Augmented by the icon-sheets runtime via
  * `declare module "#app"`.
  */
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type -- augmented by the runtime
 export interface RuntimeNuxtHooks {}
 
 /**
- * The Nuxt app instance. The `$iconic` service is added by the iconic runtime
+ * The Nuxt app instance. The `$iconSheets` service is added by the icon-sheets runtime
  * via `declare module "#app"`.
  */
 export interface NuxtApp {

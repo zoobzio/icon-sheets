@@ -1,4 +1,4 @@
-import type { NuxtIconicConfig } from "../../src/config";
+import type { NuxtIconSheetsConfig } from "../../src/config";
 
 import { mkdtemp, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
@@ -23,10 +23,10 @@ vi.mock("@nuxt/kit", () => ({
   ...kit,
 }));
 
-// Resolution is exercised by @iconic/iconify's own tests; here it is stubbed so
+// Resolution is exercised by @icon-sheets/iconify's own tests; here it is stubbed so
 // the module runs offline. `resolveSet` echoes the identity with a single
 // resolved icon, so any authored set id flows through to the catalog.
-vi.mock("@iconic/iconify", () => ({
+vi.mock("@icon-sheets/iconify", () => ({
   resolveContract: vi.fn(async () => structuredClone(contract)),
   resolveSet: vi.fn(
     async ({ identity }: { identity: { id: string; name: string } }) => ({
@@ -36,7 +36,7 @@ vi.mock("@iconic/iconify", () => ({
   ),
 }));
 
-import { resolveContract, resolveSet } from "@iconic/iconify";
+import { resolveContract, resolveSet } from "@icon-sheets/iconify";
 import module from "../../src/module";
 
 interface FakeNuxt {
@@ -50,11 +50,11 @@ interface FakeNuxt {
 
 interface ModuleDef {
   meta: { name: string; configKey: string };
-  setup: (options: NuxtIconicConfig, nuxt: FakeNuxt) => Promise<void>;
+  setup: (options: NuxtIconSheetsConfig, nuxt: FakeNuxt) => Promise<void>;
 }
 const mod = module as unknown as ModuleDef;
 
-const options: NuxtIconicConfig = { icons: { home: "lucide:home" }, sets };
+const options: NuxtIconSheetsConfig = { icons: { home: "lucide:home" }, sets };
 
 const template = (filename: string) =>
   kit.addTemplate.mock.calls
@@ -71,12 +71,12 @@ const build = async () => {
   }
 };
 
-describe("iconic module", () => {
+describe("icon-sheets module", () => {
   beforeEach(async () => {
     vi.clearAllMocks();
     nuxt = {
       options: {
-        buildDir: await mkdtemp(join(tmpdir(), "iconic-module-")),
+        buildDir: await mkdtemp(join(tmpdir(), "icon-sheets-module-")),
         nitro: {},
         runtimeConfig: {},
       },
@@ -89,7 +89,7 @@ describe("iconic module", () => {
   });
 
   it("has the expected meta", () => {
-    expect(mod.meta).toEqual({ name: "iconic", configKey: "iconic" });
+    expect(mod.meta).toEqual({ name: "icon-sheets", configKey: "iconSheets" });
   });
 
   it("fails plainly when no icons are configured", async () => {
@@ -112,7 +112,7 @@ describe("iconic module", () => {
   it("writes the catalog manifest and payloads on build:before", async () => {
     await mod.setup(options, nuxt);
     await build();
-    const dir = join(nuxt.options.buildDir, "iconic");
+    const dir = join(nuxt.options.buildDir, "icon-sheets");
 
     const entries: unknown = JSON.parse(
       await readFile(join(dir, "entries.json"), "utf8"),
@@ -126,7 +126,7 @@ describe("iconic module", () => {
     expect(Object.keys(payloads)).toEqual(["sharp", "round"]);
 
     const markup = await readFile(join(dir, "sprite.html"), "utf8");
-    expect(markup).toContain('id="iconic-sprite"');
+    expect(markup).toContain('id="icon-sheets-sprite"');
     expect(markup).toContain('<symbol id="home"');
   });
 
@@ -138,7 +138,7 @@ describe("iconic module", () => {
 
     const entries: unknown = JSON.parse(
       await readFile(
-        join(nuxt.options.buildDir, "iconic", "entries.json"),
+        join(nuxt.options.buildDir, "icon-sheets", "entries.json"),
         "utf8",
       ),
     );
@@ -148,7 +148,10 @@ describe("iconic module", () => {
   it("mounts the catalog directory as a nitro server asset", async () => {
     await mod.setup(options, nuxt);
     expect(nuxt.options.nitro.serverAssets).toEqual([
-      { baseName: "iconic", dir: join(nuxt.options.buildDir, "iconic") },
+      {
+        baseName: "icon-sheets",
+        dir: join(nuxt.options.buildDir, "icon-sheets"),
+      },
     ]);
   });
 
@@ -157,12 +160,12 @@ describe("iconic module", () => {
     const handlers = kit.addServerHandler.mock.calls.map((call) => call[0]);
     expect(handlers).toEqual([
       {
-        route: "/api/iconic/sets",
+        route: "/api/icon-sheets/sets",
         method: "get",
         handler: "/resolved./runtime/server/list",
       },
       {
-        route: "/api/iconic/sets/:id",
+        route: "/api/icon-sheets/sets/:id",
         method: "get",
         handler: "/resolved./runtime/server/get",
       },
@@ -172,7 +175,7 @@ describe("iconic module", () => {
   it("registers a type template with the alias union", async () => {
     await mod.setup(options, nuxt);
     const types = kit.addTypeTemplate.mock.calls[0][0];
-    expect(types.filename).toBe("types/iconic.d.ts");
+    expect(types.filename).toBe("types/icon-sheets.d.ts");
     expect(types.getContents()).toContain(
       'export type Alias = "home" | "save";',
     );
@@ -180,7 +183,7 @@ describe("iconic module", () => {
 
   it("registers a build template exporting the contract", async () => {
     await mod.setup(options, nuxt);
-    const build = template("iconic.mjs");
+    const build = template("icon-sheets.mjs");
     expect(build).toBeDefined();
     expect(build!.getContents()).toContain("export const contract =");
   });
@@ -198,12 +201,12 @@ describe("iconic module", () => {
     expect(kit.addComponent.mock.calls[0][0]).toMatchObject({ name: "Icon" });
   });
 
-  it("auto-imports useIconic", async () => {
+  it("auto-imports useIconSheets", async () => {
     await mod.setup(options, nuxt);
     const names = kit.addImports.mock.calls[0][0].map(
       (entry: { name: string }) => entry.name,
     );
-    expect(names).toContain("useIconic");
+    expect(names).toContain("useIconSheets");
   });
 
   it("threads a bearer request loader to the resolvers only when the token env is set", async () => {
@@ -212,7 +215,7 @@ describe("iconic module", () => {
     expect(vi.mocked(resolveSet).mock.calls[0][0].req).toBeUndefined();
 
     vi.clearAllMocks();
-    process.env.NUXT_ICONIC_TOKEN = "secret";
+    process.env.NUXT_ICON_SHEETS_TOKEN = "secret";
     try {
       await mod.setup(options, nuxt);
       expect(typeof vi.mocked(resolveContract).mock.calls[0][0].req).toBe(
@@ -222,7 +225,7 @@ describe("iconic module", () => {
         "function",
       );
     } finally {
-      delete process.env.NUXT_ICONIC_TOKEN;
+      delete process.env.NUXT_ICON_SHEETS_TOKEN;
     }
   });
 
@@ -237,7 +240,7 @@ describe("iconic module", () => {
       },
       nuxt,
     );
-    expect(nuxt.options.runtimeConfig.iconic).toEqual({
+    expect(nuxt.options.runtimeConfig.iconSheets).toEqual({
       base: "https://vendor.test",
       headers: { "x-tenant": "acme" },
       token: "",

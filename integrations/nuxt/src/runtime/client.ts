@@ -1,14 +1,14 @@
-import type { AppIconic } from "./types";
+import type { AppIconSheets } from "./types";
 
-import { makeIconic as makeService } from "@iconic/iconic";
-import { accessIconic } from "./store";
+import { makeIconSheets as makeService } from "@icon-sheets/icon-sheets";
+import { accessIconSheets } from "./store";
 
 /**
- * Builds the iconic service over the reactive per-request container. State lives
+ * Builds the icon-sheets service over the reactive per-request container. State lives
  * in the container the store owns, so reads and writes are tracked and the sprite
  * re-renders when a set is applied or an override is written.
  */
-export const makeIconic = (): AppIconic => {
-  const { config } = accessIconic();
+export const makeIconSheets = (): AppIconSheets => {
+  const { config } = accessIconSheets();
   return makeService(config.value);
 };

@@ -2,7 +2,11 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
 let assets: Record<string, unknown>;
 let runtime: {
-  iconic?: { base?: string; headers?: Record<string, string>; token?: string };
+  iconSheets?: {
+    base?: string;
+    headers?: Record<string, string>;
+    token?: string;
+  };
 };
 
 vi.mock("h3", () => ({
@@ -32,7 +36,7 @@ const sharp = { id: "sharp", name: "Sharp", icons: {} };
 describe("catalog retrieval route", () => {
   beforeEach(() => {
     assets = { "sets.json": { sharp } };
-    runtime = { iconic: {} };
+    runtime = { iconSheets: {} };
   });
 
   describe("local (build-emitted) sets", () => {
@@ -63,7 +67,7 @@ describe("catalog retrieval route", () => {
 
     beforeEach(() => {
       runtime = {
-        iconic: { base: "https://vendor.test/api", token: "sk_live" },
+        iconSheets: { base: "https://vendor.test/api", token: "sk_live" },
       };
       vi.stubGlobal("fetch", fetchMock);
       fetchMock.mockReset();

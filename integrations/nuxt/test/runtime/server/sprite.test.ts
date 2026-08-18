@@ -31,12 +31,14 @@ const render = async (): Promise<string> => {
 
 describe("sprite server plugin", () => {
   beforeEach(() => {
-    assets = { "sprite.html": '<div id="iconic-sprite"><svg></svg></div>' };
+    assets = {
+      "sprite.html": '<div id="icon-sheets-sprite"><svg></svg></div>',
+    };
   });
 
   it("inlines the prebuilt sprite markup from the server asset", async () => {
     const markup = await render();
-    expect(markup).toBe('<div id="iconic-sprite"><svg></svg></div>');
+    expect(markup).toBe('<div id="icon-sheets-sprite"><svg></svg></div>');
   });
 
   it("prepends nothing when the asset is missing", async () => {

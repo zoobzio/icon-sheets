@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import type { Contract, IconifyIcon } from "@iconic/schema";
+import type { Contract, IconifyIcon } from "@icon-sheets/schema";
 
 import { defineSprite } from "../src/sprite";
 import type { Source } from "../src/types";

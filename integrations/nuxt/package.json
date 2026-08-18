@@ -1,5 +1,5 @@
 {
-  "name": "@iconic/nuxt",
+  "name": "@icon-sheets/nuxt",
   "version": "0.1.0",
   "type": "module",
   "main": "./.dist/module.mjs",
@@ -29,10 +29,10 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@iconic/iconify": "workspace:*",
+    "@icon-sheets/iconify": "workspace:*",
     "@nuxt/kit": "^4.4.6",
     "h3": "^1.15.11",
-    "@iconic/iconic": "workspace:*",
+    "@icon-sheets/icon-sheets": "workspace:*",
     "objectively": "^0.1.1",
     "vue": "^3.5.35"
   },

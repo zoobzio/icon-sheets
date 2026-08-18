@@ -69,7 +69,7 @@ jobs:
       # Build and publish anything whose version isn't yet on npm. Tokenless
       # OIDC — no NPM_TOKEN. Provenance is emitted under trusted publishing.
       # NOTE: OIDC trusted publishing cannot CREATE a brand-new package, and the
-      # `@iconic/*` packages are not yet on npm. Bootstrap each package once with
+      # `@icon-sheets/*` packages are not yet on npm. Bootstrap each package once with
       # a classic npm token (a manual `npm publish`, or a temporary NODE_AUTH_TOKEN
       # here), then configure a trusted publisher per package — after that this
       # tokenless step publishes every subsequent release.

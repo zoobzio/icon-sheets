@@ -4,7 +4,11 @@ import type { Ref } from "vue";
 export declare function useState<T>(key: string, init: () => T): Ref<T>;
 
 export declare function useRuntimeConfig(): {
-  iconic?: { base?: string; headers?: Record<string, string>; token?: string };
+  iconSheets?: {
+    base?: string;
+    headers?: Record<string, string>;
+    token?: string;
+  };
 };
 
 // Nitro's storage surface, as far as the server routes reach into it. The read

@@ -1,4 +1,4 @@
-import type { IconifyIcon, Identity } from "@iconic/schema";
+import type { IconifyIcon, Identity } from "@icon-sheets/schema";
 
 /**
  * The authored ref config: the input to {@link generate}. Identity plus an
@@ -66,7 +66,7 @@ export type SharedOptions = {
 
 /**
  * Options for {@link generate}: the authored ref config plus the shared I/O
- * hooks. Emits an `iconic.config.ts` carrying the resolved contract.
+ * hooks. Emits an `icon-sheets.config.ts` carrying the resolved contract.
  */
 export type GenerateOptions = SharedOptions & {
   config: RefConfig;

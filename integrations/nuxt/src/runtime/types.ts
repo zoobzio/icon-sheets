@@ -1,12 +1,12 @@
-import type { Alias } from "#build/types/iconic.d.ts";
+import type { Alias } from "#build/types/icon-sheets.d.ts";
 import type {
   Config,
   Identity,
   IconifyIcon,
-  Iconic,
+  IconSheets,
   Overrides,
   Set,
-} from "@iconic/iconic";
+} from "@icon-sheets/icon-sheets";
 
 /**
  * The active contract, its alias keys derived from the build-time union. Keyed
@@ -32,21 +32,21 @@ export type AppConfig = Config<AppContract>;
 /**
  * The runtime icon service bound to the app's contract.
  */
-export type AppIconic = Iconic<AppContract>;
+export type AppIconSheets = IconSheets<AppContract>;
 
 /**
  * The runtime hooks the service emits, keyed by event name. Shared with the
  * `#app` augmentation so the two never drift.
  */
-export interface IconicHooks {
-  "iconic:ready": (service: AppIconic) => void;
+export interface IconSheetsHooks {
+  "icon-sheets:ready": (service: AppIconSheets) => void;
 }
 
 declare module "#app" {
   interface NuxtApp {
-    $iconic: AppIconic;
+    $iconSheets: AppIconSheets;
   }
 
   // eslint-disable-next-line @typescript-eslint/no-empty-object-type
-  interface RuntimeNuxtHooks extends IconicHooks {}
+  interface RuntimeNuxtHooks extends IconSheetsHooks {}
 }

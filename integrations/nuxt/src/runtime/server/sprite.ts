@@ -1,6 +1,6 @@
 import { defineNitroPlugin, useStorage } from "#imports";
 
-import { ASSETS, SPRITE } from "@iconic/nuxt/constant";
+import { ASSETS, SPRITE } from "@icon-sheets/nuxt/constant";
 
 /**
  * Inlines the prebuilt base sprite into the body so icons paint on first load

@@ -1,7 +1,7 @@
-import type { Contract, IconifyIcon, Set } from "@iconic/schema";
+import type { Contract, IconifyIcon, Set } from "@icon-sheets/schema";
 import type { Entry, Listing, Page } from "../src/types";
 
-import { defineSchema } from "@iconic/schema";
+import { defineSchema } from "@icon-sheets/schema";
 
 /* Icon literals named once so assertions can compare against them. */
 export const path: IconifyIcon = { body: '<path d="M0 0"/>', width: 24 };

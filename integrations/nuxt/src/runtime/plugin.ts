@@ -1,12 +1,12 @@
 import { defineNuxtPlugin } from "#app";
 import { watchEffect } from "vue";
-import { defineSprite } from "@iconic/iconic/svg";
-import { makeIconic } from "./client";
+import { defineSprite } from "@icon-sheets/icon-sheets/svg";
+import { makeIconSheets } from "./client";
 import { CONTAINER } from "../constant";
 
 /**
- * Nuxt plugin that builds the iconic service over an SSR-serializable, reactive
- * container and provides it as `$iconic`.
+ * Nuxt plugin that builds the icon-sheets service over an SSR-serializable, reactive
+ * container and provides it as `$iconSheets`.
  *
  * The sprite for the base contract is inlined into the body server-side (see the
  * nitro plugin), so icons paint on first load. On the client the sprite is kept
@@ -16,10 +16,10 @@ import { CONTAINER } from "../constant";
  * `<use href="#alias">` in each `<Icon>` never changes — only the symbol body does.
  */
 export default defineNuxtPlugin({
-  name: "iconic",
+  name: "icon-sheets",
   setup: async (nuxtApp) => {
-    const iconic = makeIconic();
-    const sprite = defineSprite(iconic);
+    const iconSheets = makeIconSheets();
+    const sprite = defineSprite(iconSheets);
 
     if (import.meta.client) {
       let container = document.getElementById(CONTAINER);
@@ -34,11 +34,11 @@ export default defineNuxtPlugin({
       });
     }
 
-    await nuxtApp.callHook("iconic:ready", iconic);
+    await nuxtApp.callHook("icon-sheets:ready", iconSheets);
 
     return {
       provide: {
-        iconic,
+        iconSheets,
       },
     };
   },

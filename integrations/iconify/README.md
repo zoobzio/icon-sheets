@@ -1,8 +1,8 @@
-# @iconic/iconify
+# @icon-sheets/iconify
 
-Codegen from an authored **ref config** to an `iconic.config.ts` contract of
+Codegen from an authored **ref config** to an `icon-sheets.config.ts` contract of
 resolved icon literals — and from a ref map to a **set** JSON document. The
-build-layer analog of iconic's runtime: it holds all the IconifyJSON handling —
+build-layer analog of icon-sheets's runtime: it holds all the IconifyJSON handling —
 loading collections, flattening alias chains, merging transforms — so the
 runtime carries none of it.
 
@@ -27,7 +27,7 @@ and the result is the file contents for the caller to write.
 
 ```ts
 import { writeFile } from "node:fs/promises";
-import { generate, generateSet } from "@iconic/iconify";
+import { generate, generateSet } from "@icon-sheets/iconify";
 
 const contract = await generate({
   config: {
@@ -36,7 +36,7 @@ const contract = await generate({
     icons: { home: "lucide:home", save: "lucide:content-save" },
   },
 });
-await writeFile(contract.filename, contract.contents); // iconic.config.ts
+await writeFile(contract.filename, contract.contents); // icon-sheets.config.ts
 
 const set = await generateSet({
   identity: { id: "solid", name: "Solid" },
@@ -46,12 +46,12 @@ const set = await generateSet({
 await writeFile(set.filename, set.contents); // solid.set.json
 ```
 
-The emitted `iconic.config.ts`:
+The emitted `icon-sheets.config.ts`:
 
 ```ts
-import { defineIconicConfig } from "@iconic/iconic/config";
+import { defineIconSheetsConfig } from "@icon-sheets/icon-sheets/config";
 
-export default defineIconicConfig({
+export default defineIconSheetsConfig({
   contract: {
     id: "app",
     name: "App Icons",
@@ -78,7 +78,7 @@ The emitted `solid.set.json` — the catalog payload:
   `alias → ref`.
 - `generateSet` membership-checks each ref key against the contract's `aliases`
   before resolving — a set may only rebind aliases the contract declares.
-- The assembled document is validated through `@iconic/schema` before emission;
+- The assembled document is validated through `@icon-sheets/schema` before emission;
   a failure there is a resolution bug or a bad config, cited to the ref.
 - `$/` responses are trusted, not sanitized — untrusted sources are a separate
   concern.

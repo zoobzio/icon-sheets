@@ -1,4 +1,4 @@
-import type { Alias, Contract, Schema, Set } from "@iconic/schema";
+import type { Alias, Contract, Schema, Set } from "@icon-sheets/schema";
 import type { Catalog, Listing, Page, Provider, Query } from "./types";
 
 import { LIMIT, SORT } from "./constant";

@@ -1,17 +1,20 @@
 {
   "$schema": "https://unpkg.com/@changesets/config@3.1.1/schema.json",
-  "changelog": ["@changesets/changelog-github", { "repo": "zoobzio/iconic" }],
+  "changelog": [
+    "@changesets/changelog-github",
+    { "repo": "zoobzio/icon-sheets" }
+  ],
   "commit": false,
   "access": "public",
   "baseBranch": "main",
   "fixed": [
     [
-      "iconic",
-      "@iconic/core",
-      "@iconic/schema",
-      "@iconic/utils",
-      "@iconic/svg",
-      "@iconic/nuxt"
+      "icon-sheets",
+      "@icon-sheets/core",
+      "@icon-sheets/schema",
+      "@icon-sheets/utils",
+      "@icon-sheets/svg",
+      "@icon-sheets/nuxt"
     ]
   ],
   "linked": [],

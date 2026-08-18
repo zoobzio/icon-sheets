@@ -1,4 +1,4 @@
-import type { IconifyIcon } from "@iconic/schema";
+import type { IconifyIcon } from "@icon-sheets/schema";
 
 import type { RefEntry, SchemeResolver } from "./types";
 
@@ -24,7 +24,7 @@ export const assemble = async (
     const resolver = resolvers[entry.parsed.scheme];
     if (!resolver) {
       throw new Error(
-        `@iconic/iconify: no resolver for scheme "${entry.parsed.scheme}" (alias "${entry.alias}")`,
+        `@icon-sheets/iconify: no resolver for scheme "${entry.parsed.scheme}" (alias "${entry.alias}")`,
       );
     }
     const icon = await resolver(entry.parsed);
@@ -40,7 +40,7 @@ export const assemble = async (
       .map((miss) => `  ${miss.alias} → ${miss.raw}`)
       .join("\n");
     throw new Error(
-      `@iconic/iconify: ${misses.length} icon(s) could not be resolved —\n${lines}`,
+      `@icon-sheets/iconify: ${misses.length} icon(s) could not be resolved —\n${lines}`,
     );
   }
 

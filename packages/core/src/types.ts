@@ -6,10 +6,10 @@ import type {
   Overrides,
   Schema,
   Set,
-} from "@iconic/schema";
+} from "@icon-sheets/schema";
 
 /**
- * The caller-owned live state an {@link Iconic} service reads and writes: the
+ * The caller-owned live state an {@link IconSheets} service reads and writes: the
  * active contract definition and the user override layer that `set` populates.
  * Pass a plain object for inert state, or a reactive proxy to have reads and
  * writes tracked — the hook a framework integration binds runtime swapping to.
@@ -53,7 +53,7 @@ export type Options<C extends Contract> = {
  * merges overrides into the active definition; `set` writes a single override.
  * The active state is read and written through `config`.
  */
-export interface Iconic<C extends Contract> {
+export interface IconSheets<C extends Contract> {
   /**
    * The caller-owned live state, fronted by get/set middleware — the single
    * place state is read or written raw.

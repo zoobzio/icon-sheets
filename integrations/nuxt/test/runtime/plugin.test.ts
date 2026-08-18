@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { ref, type Ref } from "vue";
 import { contract } from "../fixtures";
 
-vi.mock("#build/iconic.mjs", () => ({
+vi.mock("#build/icon-sheets.mjs", () => ({
   get contract() {
     return structuredClone(contract);
   },
@@ -35,23 +35,26 @@ const setup = async () => {
   return result.provide;
 };
 
-describe("iconic plugin", () => {
+describe("icon-sheets plugin", () => {
   beforeEach(() => {
     states = {};
     callHook.mockClear();
   });
 
-  it("is named iconic", () => {
-    expect(plugin.name).toBe("iconic");
+  it("is named icon-sheets", () => {
+    expect(plugin.name).toBe("icon-sheets");
   });
 
-  it("provides the iconic service", async () => {
+  it("provides the icon-sheets service", async () => {
     const provide = await setup();
-    expect(provide.iconic).toBeDefined();
+    expect(provide.iconSheets).toBeDefined();
   });
 
-  it("emits iconic:ready with the service", async () => {
+  it("emits icon-sheets:ready with the service", async () => {
     const provide = await setup();
-    expect(callHook).toHaveBeenCalledWith("iconic:ready", provide.iconic);
+    expect(callHook).toHaveBeenCalledWith(
+      "icon-sheets:ready",
+      provide.iconSheets,
+    );
   });
 });

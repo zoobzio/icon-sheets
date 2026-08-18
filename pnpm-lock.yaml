@@ -50,10 +50,10 @@ importers:
 
   examples/nuxt:
     dependencies:
-      '@iconic/iconic':
+      '@icon-sheets/icon-sheets':
         specifier: workspace:*
-        version: link:../../packages/iconic
-      '@iconic/nuxt':
+        version: link:../../packages/icon-sheets
+      '@icon-sheets/nuxt':
         specifier: workspace:*
         version: link:../../integrations/nuxt
       nuxt:
@@ -78,7 +78,7 @@ importers:
 
   integrations/iconify:
     dependencies:
-      '@iconic/schema':
+      '@icon-sheets/schema':
         specifier: workspace:*
         version: link:../../packages/schema
       '@iconify/types':
@@ -91,22 +91,22 @@ importers:
         specifier: ^0.1.1
         version: 0.1.1
     devDependencies:
-      '@iconic/catalog':
+      '@icon-sheets/catalog':
         specifier: workspace:*
         version: link:../../packages/catalog
-      '@iconic/iconic':
+      '@icon-sheets/icon-sheets':
         specifier: workspace:*
-        version: link:../../packages/iconic
+        version: link:../../packages/icon-sheets
       '@types/node':
         specifier: ^25.9.1
         version: 25.9.5
 
   integrations/nuxt:
     dependencies:
-      '@iconic/iconic':
+      '@icon-sheets/icon-sheets':
         specifier: workspace:*
-        version: link:../../packages/iconic
-      '@iconic/iconify':
+        version: link:../../packages/icon-sheets
+      '@icon-sheets/iconify':
         specifier: workspace:*
         version: link:../iconify
       '@nuxt/kit':
@@ -137,7 +137,7 @@ importers:
 
   packages/catalog:
     dependencies:
-      '@iconic/schema':
+      '@icon-sheets/schema':
         specifier: workspace:*
         version: link:../schema
       objectively:
@@ -146,31 +146,31 @@ importers:
 
   packages/core:
     dependencies:
-      '@iconic/schema':
+      '@icon-sheets/schema':
         specifier: workspace:*
         version: link:../schema
-      '@iconic/utils':
+      '@icon-sheets/utils':
         specifier: workspace:*
         version: link:../utils
       objectively:
         specifier: ^0.1.1
         version: 0.1.1
 
-  packages/iconic:
+  packages/icon-sheets:
     dependencies:
-      '@iconic/catalog':
+      '@icon-sheets/catalog':
         specifier: workspace:*
         version: link:../catalog
-      '@iconic/core':
+      '@icon-sheets/core':
         specifier: workspace:*
         version: link:../core
-      '@iconic/schema':
+      '@icon-sheets/schema':
         specifier: workspace:*
         version: link:../schema
-      '@iconic/svg':
+      '@icon-sheets/svg':
         specifier: workspace:*
         version: link:../svg
-      '@iconic/utils':
+      '@icon-sheets/utils':
         specifier: workspace:*
         version: link:../utils
 
@@ -185,7 +185,7 @@ importers:
 
   packages/svg:
     dependencies:
-      '@iconic/schema':
+      '@icon-sheets/schema':
         specifier: workspace:*
         version: link:../schema
       '@iconify/utils':
@@ -194,7 +194,7 @@ importers:
 
   packages/utils:
     dependencies:
-      '@iconic/schema':
+      '@icon-sheets/schema':
         specifier: workspace:*
         version: link:../schema
       objectively:

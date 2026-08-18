@@ -1,10 +1,10 @@
 export default defineNuxtConfig({
-  modules: ["@iconic/nuxt"],
+  modules: ["@icon-sheets/nuxt"],
 
-  // Icons are authored as Iconify refs; @iconic/nuxt resolves them into a flat
+  // Icons are authored as Iconify refs; @icon-sheets/nuxt resolves them into a flat
   // contract at build time. The base contract draws from Lucide; each set
   // rebinds the same aliases with another collection's icons.
-  iconic: {
+  iconSheets: {
     id: "lucide",
     name: "Lucide",
     icons: {

@@ -1,4 +1,4 @@
-// Runtime stub for the generated `#build/iconic.mjs` virtual module.
+// Runtime stub for the generated `#build/icon-sheets.mjs` virtual module.
 export const contract = {
   id: "app",
   name: "App Icons",

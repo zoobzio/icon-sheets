@@ -56,7 +56,7 @@ jobs:
       - uses: ./.github/actions/setup
       - run: pnpm inspect
 
-  # Downstream packages resolve @iconic/* to sibling .dist type declarations,
+  # Downstream packages resolve @icon-sheets/* to sibling .dist type declarations,
   # so typecheck needs the build artifact; nuxt prepare generates the example
   # types it also reads.
   typecheck:

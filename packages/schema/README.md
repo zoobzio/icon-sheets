@@ -1,4 +1,4 @@
-# @iconic/schema
+# @icon-sheets/schema
 
 The Iconify JSON contract: the types describing an icon collection (icons,
 aliases, set-wide geometry and transforms) and the runtime validation

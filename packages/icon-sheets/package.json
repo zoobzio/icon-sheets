@@ -1,5 +1,5 @@
 {
-  "name": "@iconic/iconic",
+  "name": "@icon-sheets/icon-sheets",
   "version": "0.1.0",
   "type": "module",
   "main": "./.dist/index.mjs",
@@ -33,10 +33,10 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@iconic/catalog": "workspace:*",
-    "@iconic/core": "workspace:*",
-    "@iconic/schema": "workspace:*",
-    "@iconic/svg": "workspace:*",
-    "@iconic/utils": "workspace:*"
+    "@icon-sheets/catalog": "workspace:*",
+    "@icon-sheets/core": "workspace:*",
+    "@icon-sheets/schema": "workspace:*",
+    "@icon-sheets/svg": "workspace:*",
+    "@icon-sheets/utils": "workspace:*"
   }
 }

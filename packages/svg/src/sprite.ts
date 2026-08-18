@@ -1,11 +1,11 @@
 import { iconToSVG } from "@iconify/utils";
 
-import type { Alias, Contract } from "@iconic/schema";
+import type { Alias, Contract } from "@icon-sheets/schema";
 
 import type { Source, Sprite } from "./types";
 
 /**
- * Builds an SVG sprite from an iconic service (or any structural {@link Source}).
+ * Builds an SVG sprite from an icon-sheets service (or any structural {@link Source}).
  *
  * Every alias becomes one `<symbol id="{alias}">`, its body rendered from the
  * service's resolved icon through Iconify's own `iconToSVG` (defaults applied,

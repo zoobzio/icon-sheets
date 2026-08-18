@@ -1,11 +1,11 @@
-import type { Entry, Listing } from "@iconic/iconic/catalog";
+import type { Entry, Listing } from "@icon-sheets/icon-sheets/catalog";
 
 import { createError, defineEventHandler, getQuery } from "h3";
-import { isQuery, LIMIT, ROUTE, SORT } from "@iconic/iconic/catalog";
+import { isQuery, LIMIT, ROUTE, SORT } from "@icon-sheets/icon-sheets/catalog";
 import { record } from "objectively";
 import { useRuntimeConfig, useStorage } from "#imports";
 
-import { ASSETS, ENTRIES } from "@iconic/nuxt/constant";
+import { ASSETS, ENTRIES } from "@icon-sheets/nuxt/constant";
 import { remoteHeaders } from "./remote";
 
 /**
@@ -35,7 +35,7 @@ export default defineEventHandler(async (event) => {
    * A remote catalog is configured: proxy the listing to it, adding the
    * server-side auth. The browser never sees the token.
    */
-  const remote = useRuntimeConfig().iconic;
+  const remote = useRuntimeConfig().iconSheets;
   if (remote?.base) {
     const query = typeof q === "string" ? `?q=${encodeURIComponent(q)}` : "";
     const url = `${remote.base.replace(/\/+$/, "")}/${ROUTE}${query}`;

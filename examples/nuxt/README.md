@@ -1,6 +1,6 @@
-# @iconic/example-nuxt
+# @icon-sheets/example-nuxt
 
-A minimal Nuxt app demonstrating [`@iconic/nuxt`](../../integrations/nuxt): a
+A minimal Nuxt app demonstrating [`@icon-sheets/nuxt`](../../integrations/nuxt): a
 semantic icon contract sourced from Iconify collections, rendered as an inline
 SVG sprite, with a switcher that applies alternate icon sets at runtime.
 
@@ -13,7 +13,7 @@ SVG sprite, with a switcher that applies alternate icon sets at runtime.
   never change.
 
 ```sh
-pnpm --filter @iconic/example-nuxt dev
+pnpm --filter @icon-sheets/example-nuxt dev
 ```
 
 Then open the printed URL and use the switcher.

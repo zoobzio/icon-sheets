@@ -1,15 +1,15 @@
 <script setup lang="ts">
-import type { Page } from "@iconic/iconic/catalog";
-import { defineClient } from "@iconic/iconic/catalog";
+import type { Page } from "@icon-sheets/icon-sheets/catalog";
+import { defineClient } from "@icon-sheets/icon-sheets/catalog";
 
-const icons = useIconic();
-const catalog = defineClient(icons.schema, { base: "/api/iconic" });
+const icons = useIconSheets();
+const catalog = defineClient(icons.schema, { base: "/api/icon-sheets" });
 
 const aliases = icons.aliases();
 
 // The switcher options: the baseline contract plus every override set the
 // catalog serves.
-const { data: sets } = await useFetch<Page>("/api/iconic/sets");
+const { data: sets } = await useFetch<Page>("/api/icon-sheets/sets");
 const options = computed(() => [
   { id: icons.schema.base.id, name: icons.schema.base.name },
   ...(sets.value?.entries ?? []),
@@ -31,7 +31,7 @@ async function choose(id: string) {
 
 <template>
   <main>
-    <h1>iconic × Nuxt</h1>
+    <h1>icon-sheets × Nuxt</h1>
     <p>
       One semantic contract of icon aliases, rendered from an inline SVG sprite.
       Pick a set to <code>apply</code> it — every

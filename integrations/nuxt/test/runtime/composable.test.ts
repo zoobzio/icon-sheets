@@ -1,16 +1,16 @@
 import { describe, it, expect, vi } from "vitest";
 
-const service = { marker: "iconic" };
-const nuxtApp = { $iconic: service };
+const service = { marker: "icon-sheets" };
+const nuxtApp = { $iconSheets: service };
 
 vi.mock("#app", () => ({
   useNuxtApp: () => nuxtApp,
 }));
 
-import { useIconic } from "../../src/runtime/composable";
+import { useIconSheets } from "../../src/runtime/composable";
 
-describe("useIconic", () => {
-  it("returns the $iconic service from the nuxt app", () => {
-    expect(useIconic()).toBe(service);
+describe("useIconSheets", () => {
+  it("returns the $iconSheets service from the nuxt app", () => {
+    expect(useIconSheets()).toBe(service);
   });
 });

@@ -1,4 +1,4 @@
-import type { Contract, Schema } from "@iconic/schema";
+import type { Contract, Schema } from "@icon-sheets/schema";
 import type { Catalog, Client, Listing } from "./types";
 
 import { ROUTE } from "./constant";

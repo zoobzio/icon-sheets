@@ -1,4 +1,4 @@
-import type { Alias, Contract, Set } from "@iconic/schema";
+import type { Alias, Contract, Set } from "@icon-sheets/schema";
 
 /**
  * A catalog's knowledge of one set: the identity and discovery metadata `list`
@@ -141,7 +141,7 @@ export interface Page {
 }
 
 /**
- * A source of sets for an {@link Iconic} service: discovery through `list`,
+ * A source of sets for an {@link IconSheets} service: discovery through `list`,
  * retrieval through `get`. A catalog is a pure resolver — it holds no state, and
  * every call resolves against the underlying source — so caching lives with the
  * caller, where the environment already provides it.

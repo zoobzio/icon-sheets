@@ -1,5 +1,5 @@
 {
-  "name": "@iconic/iconify",
+  "name": "@icon-sheets/iconify",
   "version": "0.1.0",
   "type": "module",
   "main": "./.dist/index.mjs",
@@ -21,14 +21,14 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@iconic/schema": "workspace:*",
+    "@icon-sheets/schema": "workspace:*",
     "@iconify/types": "^2.0.0",
     "@iconify/utils": "^3.1.4",
     "objectively": "^0.1.1"
   },
   "devDependencies": {
-    "@iconic/catalog": "workspace:*",
+    "@icon-sheets/catalog": "workspace:*",
     "@types/node": "^25.9.1",
-    "@iconic/iconic": "workspace:*"
+    "@icon-sheets/icon-sheets": "workspace:*"
   }
 }

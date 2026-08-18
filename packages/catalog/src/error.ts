@@ -1,6 +1,6 @@
-import type { Issue } from "@iconic/schema";
+import type { Issue } from "@icon-sheets/schema";
 
-import { SchemaError } from "@iconic/schema";
+import { SchemaError } from "@icon-sheets/schema";
 
 /**
  * Raised when a value handed to {@link Catalog.list} is not a {@link Query}.

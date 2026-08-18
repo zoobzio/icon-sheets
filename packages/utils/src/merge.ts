@@ -1,4 +1,4 @@
-import type { Alias, AliasMap, Contract, Set } from "@iconic/schema";
+import type { Alias, AliasMap, Contract, Set } from "@icon-sheets/schema";
 
 import { copy } from "./copy";
 

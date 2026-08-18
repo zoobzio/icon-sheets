@@ -16,7 +16,7 @@ export const request: Req = async (src) => {
   const response = await fetch(src);
   if (!response.ok) {
     throw new Error(
-      `@iconic/iconify: fetching ${src.href} failed with ${response.status} ${response.statusText}`,
+      `@icon-sheets/iconify: fetching ${src.href} failed with ${response.status} ${response.statusText}`,
     );
   }
   return response.text();
@@ -74,7 +74,7 @@ export const acquire = async (
     const parsed = quicklyValidateIconSet(JSON.parse(body));
     if (!parsed) {
       throw new Error(
-        `@iconic/iconify: the response for "${prefix}" is not a valid IconifyJSON collection (${url.href})`,
+        `@icon-sheets/iconify: the response for "${prefix}" is not a valid IconifyJSON collection (${url.href})`,
       );
     }
     collections.set(prefix, parsed);
@@ -123,11 +123,13 @@ export const urlResolver =
     try {
       value = JSON.parse(body);
     } catch {
-      throw new Error(`@iconic/iconify: ${ref.url.href} did not return JSON`);
+      throw new Error(
+        `@icon-sheets/iconify: ${ref.url.href} did not return JSON`,
+      );
     }
     if (!isIcon(value)) {
       throw new Error(
-        `@iconic/iconify: ${ref.url.href} did not return an icon — expected { body: string, ... }`,
+        `@icon-sheets/iconify: ${ref.url.href} did not return an icon — expected { body: string, ... }`,
       );
     }
     return value;

@@ -1,5 +1,5 @@
-import { SchemaError, defineSchema } from "@iconic/schema";
-import type { Contract, Set } from "@iconic/schema";
+import { SchemaError, defineSchema } from "@icon-sheets/schema";
+import type { Contract, Set } from "@icon-sheets/schema";
 import type { IconifyJSON } from "@iconify/types";
 
 import type {
@@ -41,7 +41,7 @@ export const reframe = <T>(entries: RefEntry[], run: () => T): T => {
       return `  ${at}: ${issue.message}${cite}`;
     });
     throw new Error(
-      `@iconic/iconify: the resolved document violates iconic's schema — this is a resolution bug or a bad ref config —\n${lines.join("\n")}`,
+      `@icon-sheets/iconify: the resolved document violates icon-sheets's schema — this is a resolution bug or a bad ref config —\n${lines.join("\n")}`,
       { cause: error },
     );
   }
@@ -63,7 +63,7 @@ const resolversFor = (
  * Resolves a ref config into a validated {@link Contract}: parses the refs,
  * acquires the Iconify collections (batched, local-first with API fallback),
  * resolves each ref into an icon literal, and validates the assembled contract
- * through iconic's own schema. The object an in-memory consumer (a framework
+ * through icon-sheets's own schema. The object an in-memory consumer (a framework
  * module) wants, before serialization.
  *
  * @param options - The ref config plus I/O and resolver hooks.
@@ -90,7 +90,7 @@ export const resolveContract = async (
 
 /**
  * The programmatic entry point for a contract: resolves the ref config and
- * returns the emitted `iconic.config.ts`. No filesystem writes — the caller owns
+ * returns the emitted `icon-sheets.config.ts`. No filesystem writes — the caller owns
  * I/O both directions.
  *
  * @param options - The ref config plus I/O and resolver hooks.
@@ -108,7 +108,7 @@ export const generate = async (
  * an `apply` consumes. Every ref key is membership-checked against the contract's
  * `aliases` first (a set may only rebind known aliases), the refs resolve through
  * the same acquire/resolve pipeline, and the assembled set is validated through
- * iconic's own schema.
+ * icon-sheets's own schema.
  *
  * @param options - The set identity, the contract aliases, the ref map, and hooks.
  */
@@ -122,7 +122,7 @@ export const resolveSet = async (options: GenerateSetOptions): Promise<Set> => {
   );
   if (unknown.length > 0) {
     throw new Error(
-      `@iconic/iconify: the set rebinds aliases the contract does not declare: ${unknown.join(", ")}`,
+      `@icon-sheets/iconify: the set rebinds aliases the contract does not declare: ${unknown.join(", ")}`,
     );
   }
 

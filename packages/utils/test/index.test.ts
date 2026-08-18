@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import type { Contract, IconifyIcon, Set } from "@iconic/schema";
+import type { Contract, IconifyIcon, Set } from "@icon-sheets/schema";
 
 import { clone } from "../src/clone";
 import { copy } from "../src/copy";

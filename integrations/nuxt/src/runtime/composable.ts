@@ -1,4 +1,4 @@
-import type { AppIconic } from "./types";
+import type { AppIconSheets } from "./types";
 
 import { useNuxtApp } from "#app";
 
@@ -8,7 +8,7 @@ import { useNuxtApp } from "#app";
  * the plugin built, so a component that resolves an alias re-renders when the set
  * or an override changes.
  */
-export const useIconic = (): AppIconic => {
-  const { $iconic } = useNuxtApp();
-  return $iconic;
+export const useIconSheets = (): AppIconSheets => {
+  const { $iconSheets } = useNuxtApp();
+  return $iconSheets;
 };

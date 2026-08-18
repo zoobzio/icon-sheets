@@ -3,8 +3,8 @@ import { pathToFileURL } from "node:url";
 import { describe, expect, it } from "vitest";
 
 import type { IconifyIcon, IconifyJSON } from "@iconify/types";
-import { defineIconic } from "@iconic/iconic";
-import { defineCatalog } from "@iconic/catalog";
+import { defineIconSheets } from "@icon-sheets/icon-sheets";
+import { defineCatalog } from "@icon-sheets/catalog";
 
 import { generate, generateSet } from "../src/generate";
 import { parseRef, plan } from "../src/refs";
@@ -90,9 +90,9 @@ describe("generate", () => {
       },
       req,
     });
-    expect(result.filename).toBe("iconic.config.ts");
+    expect(result.filename).toBe("icon-sheets.config.ts");
     expect(result.contents).toContain(
-      `import { defineIconicConfig } from "@iconic/iconic/config";`,
+      `import { defineIconSheetsConfig } from "@icon-sheets/icon-sheets/config";`,
     );
     expect(result.contents).toContain("contract: {");
     expect(result.contents).toContain(`id: "app"`);
@@ -223,12 +223,12 @@ describe("round trip", () => {
     const out = new URL("./.generated/", import.meta.url);
     await mkdir(out, { recursive: true });
     await writeFile(new URL("./.gitignore", out), "*\n");
-    const file = new URL("./iconic.config.mjs", out);
+    const file = new URL("./icon-sheets.config.mjs", out);
     await writeFile(file, built.contents);
     const imported = await import(pathToFileURL(file.pathname).href);
     const contract = imported.default.contract;
 
-    const icons = defineIconic(contract);
+    const icons = defineIconSheets(contract);
     expect(icons.aliases().sort()).toEqual(["home", "save"]);
 
     // Generate a set, serve its JSON through an in-memory catalog provider.

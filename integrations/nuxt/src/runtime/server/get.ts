@@ -1,9 +1,9 @@
 import { createError, defineEventHandler, getRouterParam } from "h3";
-import { ROUTE } from "@iconic/iconic/catalog";
+import { ROUTE } from "@icon-sheets/icon-sheets/catalog";
 import { record } from "objectively";
 import { useRuntimeConfig, useStorage } from "#imports";
 
-import { ASSETS, SETS } from "@iconic/nuxt/constant";
+import { ASSETS, SETS } from "@icon-sheets/nuxt/constant";
 import { remoteHeaders } from "./remote";
 
 /**
@@ -24,7 +24,7 @@ export default defineEventHandler(async (event) => {
    * A remote catalog is configured: proxy the retrieval to it, adding the
    * server-side auth. A 404 stays a miss; the browser never sees the token.
    */
-  const remote = useRuntimeConfig().iconic;
+  const remote = useRuntimeConfig().iconSheets;
   if (remote?.base) {
     const url = `${remote.base.replace(/\/+$/, "")}/${ROUTE}/${encodeURIComponent(id)}`;
     const response = await fetch(url, { headers: remoteHeaders(remote) });

@@ -1,4 +1,4 @@
-import type { Alias } from "#build/types/iconic.d.ts";
+import type { Alias } from "#build/types/icon-sheets.d.ts";
 
 import { defineComponent, h } from "vue";
 

@@ -1,4 +1,4 @@
-import type { IconifyIcon } from "@iconic/iconic";
+import type { IconifyIcon } from "@icon-sheets/icon-sheets";
 
 const icon = (body: string): IconifyIcon => ({ body, width: 24, height: 24 });
 
@@ -16,7 +16,7 @@ export const contract = {
 };
 
 /**
- * The ref sets an app authors under `iconic.sets`, keyed for authoring
+ * The ref sets an app authors under `iconSheets.sets`, keyed for authoring
  * convenience. `round` carries discovery tags; `sharp` does not.
  */
 export const sets = {

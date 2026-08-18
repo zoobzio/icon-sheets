@@ -14,8 +14,8 @@ export default defineBuildConfig({
   externals: [
     "#app",
     "#imports",
-    "#build/iconic.mjs",
-    "#build/types/iconic.d.ts",
+    "#build/icon-sheets.mjs",
+    "#build/types/icon-sheets.d.ts",
     "@nuxt/kit",
     "@nuxt/schema",
     "nuxt",

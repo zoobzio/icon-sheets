@@ -1,11 +1,15 @@
-import type { Page } from "@iconic/iconic/catalog";
+import type { Page } from "@icon-sheets/icon-sheets/catalog";
 
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
 let assets: Record<string, unknown>;
 let query: { q?: string };
 let runtime: {
-  iconic?: { base?: string; headers?: Record<string, string>; token?: string };
+  iconSheets?: {
+    base?: string;
+    headers?: Record<string, string>;
+    token?: string;
+  };
 };
 
 vi.mock("h3", () => ({
@@ -35,7 +39,7 @@ describe("catalog listing route", () => {
   beforeEach(() => {
     assets = { "entries.json": entries };
     query = {};
-    runtime = { iconic: {} };
+    runtime = { iconSheets: {} };
   });
 
   describe("local (build-emitted) manifest", () => {
@@ -74,7 +78,7 @@ describe("catalog listing route", () => {
 
     beforeEach(() => {
       runtime = {
-        iconic: { base: "https://vendor.test/api", token: "sk_live" },
+        iconSheets: { base: "https://vendor.test/api", token: "sk_live" },
       };
       vi.stubGlobal("fetch", fetchMock);
       fetchMock.mockReset();

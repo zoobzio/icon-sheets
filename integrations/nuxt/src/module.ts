@@ -1,15 +1,15 @@
-import type { Contract, Schema, Set } from "@iconic/iconic";
-import type { Entry } from "@iconic/iconic/catalog";
-import type { NuxtIconicConfig } from "./config";
+import type { Contract, Schema, Set } from "@icon-sheets/icon-sheets";
+import type { Entry } from "@icon-sheets/icon-sheets/catalog";
+import type { NuxtIconSheetsConfig } from "./config";
 
 import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 
-import { defineSchema, makeIconic } from "@iconic/iconic";
-import { ROUTE } from "@iconic/iconic/catalog";
-import { defineSprite } from "@iconic/iconic/svg";
-import { resolveContract, resolveSet } from "@iconic/iconify";
-import type { Req } from "@iconic/iconify";
+import { defineSchema, makeIconSheets } from "@icon-sheets/icon-sheets";
+import { ROUTE } from "@icon-sheets/icon-sheets/catalog";
+import { defineSprite } from "@icon-sheets/icon-sheets/svg";
+import { resolveContract, resolveSet } from "@icon-sheets/iconify";
+import type { Req } from "@icon-sheets/iconify";
 
 import {
   defineNuxtModule,
@@ -34,27 +34,27 @@ import {
 } from "./constant";
 
 /**
- * Nuxt module for iconic.
+ * Nuxt module for icon-sheets.
  *
  * At build time it resolves the configured icon refs against the Iconify
- * collections into a flat contract, writes it to the `iconic.mjs` build
- * template, derives the `Alias` union into `types/iconic.d.ts`, and registers
- * the runtime plugin, the `<Icon>` component, and the `useIconic` auto-import.
+ * collections into a flat contract, writes it to the `icon-sheets.mjs` build
+ * template, derives the `Alias` union into `types/icon-sheets.d.ts`, and registers
+ * the runtime plugin, the `<Icon>` component, and the `useIconSheets` auto-import.
  * Set payloads are never bundled with the app: they are resolved to JSON,
  * mounted as nitro server assets, and served over the catalog wire protocol —
  * listings at `${MOUNT}/sets`, payloads at `${MOUNT}/sets/:id`.
  */
-export default defineNuxtModule<NuxtIconicConfig>({
+export default defineNuxtModule<NuxtIconSheetsConfig>({
   meta: {
-    name: "iconic",
-    configKey: "iconic",
+    name: "icon-sheets",
+    configKey: "iconSheets",
   },
   setup: async (options, nuxt) => {
     const resolver = createResolver(import.meta.url);
 
     if (!options.icons) {
       throw new Error(
-        "iconic: no icons configured — set `iconic.icons` in nuxt.config.",
+        "icon-sheets: no icons configured — set `iconSheets.icons` in nuxt.config.",
       );
     }
 
@@ -75,7 +75,7 @@ export default defineNuxtModule<NuxtIconicConfig>({
           const response = await fetch(src, { headers });
           if (!response.ok) {
             throw new Error(
-              `iconic: fetching ${src.href} failed with ${response.status} ${response.statusText}`,
+              `icon-sheets: fetching ${src.href} failed with ${response.status} ${response.statusText}`,
             );
           }
           return response.text();
@@ -106,7 +106,7 @@ export default defineNuxtModule<NuxtIconicConfig>({
       schema.assert.set(set);
       if (set.id in catalog) {
         throw new Error(
-          `iconic: duplicate set id "${set.id}" in \`iconic.sets\`.`,
+          `icon-sheets: duplicate set id "${set.id}" in \`icon-sheets.sets\`.`,
         );
       }
       catalog[set.id] = set;
@@ -124,7 +124,7 @@ export default defineNuxtModule<NuxtIconicConfig>({
      * The server runtime cannot import the app's `#build` contract, so the markup
      * is written as an asset the nitro plugin reads and inlines.
      */
-    const sprite = defineSprite(makeIconic({ contract, override: {} }));
+    const sprite = defineSprite(makeIconSheets({ contract, override: {} }));
     const markup = `<div id="${CONTAINER}">${sprite.sheet()}</div>`;
 
     /*
@@ -152,7 +152,7 @@ export default defineNuxtModule<NuxtIconicConfig>({
      * same variable read from `process.env` above — so one env var serves both
      * the build-time resolution and the runtime set loading.
      */
-    nuxt.options.runtimeConfig.iconic = {
+    nuxt.options.runtimeConfig.iconSheets = {
       base: options.catalog?.base ?? "",
       headers: options.catalog?.headers ?? {},
       token: "",
@@ -171,14 +171,14 @@ export default defineNuxtModule<NuxtIconicConfig>({
     });
 
     addTypeTemplate({
-      filename: "types/iconic.d.ts",
+      filename: "types/icon-sheets.d.ts",
       write: true,
       getContents: () => {
         const union = Array.from(schema.enums.aliases)
           .map((alias) => JSON.stringify(alias))
           .join(" | ");
         return [
-          `import type { IconifyIcon } from "@iconic/iconic";`,
+          `import type { IconifyIcon } from "@icon-sheets/icon-sheets";`,
           `export type Alias = ${union || "never"};`,
           `export type Overrides = Partial<Record<Alias, IconifyIcon>>;`,
         ].join("\n");
@@ -186,18 +186,18 @@ export default defineNuxtModule<NuxtIconicConfig>({
     });
 
     addTemplate({
-      filename: "iconic.mjs",
+      filename: "icon-sheets.mjs",
       write: true,
       getContents: () => `export const contract = ${JSON.stringify(contract)};`,
     });
 
     addTemplate({
-      filename: "iconic.d.mts",
+      filename: "icon-sheets.d.mts",
       write: true,
       getContents: () =>
         [
-          `import type { Identity, IconifyIcon } from "@iconic/iconic";`,
-          `import type { Alias } from "./types/iconic";`,
+          `import type { Identity, IconifyIcon } from "@icon-sheets/icon-sheets";`,
+          `import type { Alias } from "./types/icon-sheets";`,
           `export const contract: Identity & { icons: Record<Alias, IconifyIcon> };`,
         ].join("\n"),
     });
@@ -216,18 +216,18 @@ export default defineNuxtModule<NuxtIconicConfig>({
     addImports([
       {
         from: resolver.resolve("./runtime/composable"),
-        name: "useIconic",
+        name: "useIconSheets",
       },
       {
         from: resolver.resolve("./runtime/store"),
-        name: "accessIconic",
+        name: "accessIconSheets",
       },
       ...[
         "AppContract",
         "AppSet",
         "AppOverrides",
         "AppConfig",
-        "AppIconic",
+        "AppIconSheets",
       ].map((name) => ({
         from: resolver.resolve("./runtime/types"),
         name,

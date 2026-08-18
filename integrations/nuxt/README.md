@@ -1,23 +1,23 @@
-# @iconic/nuxt
+# @icon-sheets/nuxt
 
-Nuxt module for iconic. At build time it resolves the icon refs configured in
+Nuxt module for icon-sheets. At build time it resolves the icon refs configured in
 `nuxt.config` against the Iconify collections into a flat contract, derives the
 `Alias` union for autocompletion, inlines an SVG sprite sheet server-side, and
-registers the runtime `<Icon>` component, the `useIconic` composable, and a
+registers the runtime `<Icon>` component, the `useIconSheets` composable, and a
 catalog served over the wire protocol.
 
 ## Usage
 
 Author icons as refs — the module resolves them with
-[`@iconic/iconify`](../iconify) at build time. Refs draw from local
+[`@icon-sheets/iconify`](../iconify) at build time. Refs draw from local
 `@iconify-json/*` packages first, then the public Iconify API; a
 `$/host/path` ref fetches a single icon from a URL:
 
 ```ts
 // nuxt.config.ts
 export default defineNuxtConfig({
-  modules: ["@iconic/nuxt"],
-  iconic: {
+  modules: ["@icon-sheets/nuxt"],
+  iconSheets: {
     icons: {
       home: "lucide:home",
       save: "lucide:content-save",
@@ -40,16 +40,16 @@ Reference aliases by name — a typo fails to compile:
 
 ## Runtime
 
-`useIconic()` returns the icon service — the active contract, the applied set,
+`useIconSheets()` returns the icon service — the active contract, the applied set,
 and the user override layer:
 
 ```ts
-const icons = useIconic();
+const icons = useIconSheets();
 icons.resolve("home"); // the resolved icon literal
 ```
 
 Sets are discovered and retrieved through the catalog the module mounts at
-`/api/iconic/sets`; `apply` swaps the active document and the sprite re-renders in
+`/api/icon-sheets/sets`; `apply` swaps the active document and the sprite re-renders in
 place (the `<use href="#alias">` never changes). A selection does not yet persist
 across reloads — that lands with SSR-safe restoration later.
 
@@ -60,7 +60,7 @@ Point the catalog at a remote vendor instead of (or alongside) build-emitted
 browser only ever talks to the app's own origin:
 
 ```ts
-iconic: {
+iconSheets: {
   icons: { home: "acme:home" },
   catalog: {
     base: "https://icons.acme.com",     // remote origin (non-secret)
@@ -69,20 +69,20 @@ iconic: {
 }
 ```
 
-Auth is a **single env var**, `NUXT_ICONIC_TOKEN`, sent as a bearer token. It is
+Auth is a **single env var**, `NUXT_ICON_SHEETS_TOKEN`, sent as a bearer token. It is
 read from `process.env` at build (to resolve refs from a private source) and from
 `runtimeConfig` at runtime (to load sets) — so one variable covers both phases and
 no secret lives in `nuxt.config` or the bundle:
 
 ```sh
 # .env
-NUXT_ICONIC_TOKEN=sk_live_…
+NUXT_ICON_SHEETS_TOKEN=sk_live_…
 ```
 
 ## How it works
 
-- **Build** — resolves `icons` into a contract, writes it to `#build/iconic.mjs`,
-  and derives `Alias` into `#build/types/iconic.d.ts`. Sets are resolved to JSON,
+- **Build** — resolves `icons` into a contract, writes it to `#build/icon-sheets.mjs`,
+  and derives `Alias` into `#build/types/icon-sheets.d.ts`. Sets are resolved to JSON,
   mounted as nitro server assets, and served by the catalog routes; payloads
   never enter the app bundle.
 - **Server** — a nitro plugin inlines the base contract's sprite into the body so

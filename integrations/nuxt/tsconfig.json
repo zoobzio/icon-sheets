@@ -8,11 +8,13 @@
     "skipLibCheck": true,
     "types": ["node", "@nuxt/nitro-server"],
     "paths": {
-      "@iconic/nuxt/constant": ["./src/constant.ts"],
+      "@icon-sheets/nuxt/constant": ["./src/constant.ts"],
       "#app": ["./src/stubs/app.d.ts"],
       "#imports": ["./src/stubs/imports.d.ts"],
-      "#build/iconic.mjs": ["./src/stubs/build/iconic.d.mts"],
-      "#build/types/iconic.d.ts": ["./src/stubs/build/types/iconic.d.ts"]
+      "#build/icon-sheets.mjs": ["./src/stubs/build/icon-sheets.d.mts"],
+      "#build/types/icon-sheets.d.ts": [
+        "./src/stubs/build/types/icon-sheets.d.ts"
+      ]
     }
   },
   "include": ["src", "test"]

@@ -1,7 +1,7 @@
 /**
  * The default name of the emitted configuration file.
  */
-export const FILENAME = "iconic.config.ts";
+export const FILENAME = "icon-sheets.config.ts";
 
 /**
  * The public Iconify API — the fallback when a collection is not installed

@@ -1,9 +1,9 @@
-import type { Issue } from "@iconic/schema";
+import type { Issue } from "@icon-sheets/schema";
 
-import { SchemaError } from "@iconic/schema";
+import { SchemaError } from "@icon-sheets/schema";
 
 /**
- * Raised when the contract handed to {@link defineIconic} violates its own
+ * Raised when the contract handed to {@link defineIconSheets} violates its own
  * shape. Extends {@link SchemaError}, so it carries the underlying
  * {@link Issue}s while naming which boundary rejected the value.
  */
@@ -46,7 +46,7 @@ export class UnknownAliasError extends Error {
   readonly alias: string;
 
   constructor(alias: string) {
-    super(`iconic: unknown alias "${alias}"`);
+    super(`icon-sheets: unknown alias "${alias}"`);
     this.name = "UnknownAliasError";
     this.alias = alias;
   }

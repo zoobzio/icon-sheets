@@ -6,7 +6,7 @@ export default defineConfig({
     // The runtime reaches shared constants through the package's own `./constant`
     // export; alias it to source so tests never depend on a built `.dist`.
     alias: {
-      "@iconic/nuxt/constant": fileURLToPath(
+      "@icon-sheets/nuxt/constant": fileURLToPath(
         new URL("./src/constant.ts", import.meta.url),
       ),
     },

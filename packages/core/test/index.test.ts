@@ -1,15 +1,15 @@
 import { describe, expect, it } from "vitest";
 
-import type { Contract, IconifyIcon, Set } from "@iconic/schema";
+import type { Contract, IconifyIcon, Set } from "@icon-sheets/schema";
 
-import { defineIconic } from "../src/service";
+import { defineIconSheets } from "../src/service";
 import { InvalidSetError } from "../src/error";
 
 const home: IconifyIcon = { body: '<path d="M0 0"/>', width: 24, height: 24 };
 const star: IconifyIcon = { body: "<circle/>", width: 24, height: 24 };
 const sharpHome: IconifyIcon = { body: "<rect/>", width: 24, height: 24 };
 
-// `satisfies` keeps the precise icon-key literal type, so `defineIconic`'s
+// `satisfies` keeps the precise icon-key literal type, so `defineIconSheets`'s
 // `const` inference yields a narrow `Alias` union and typos fail to compile.
 const base = {
   id: "demo",
@@ -23,21 +23,21 @@ const sharp: Set = {
   icons: { home: sharpHome },
 };
 
-describe("defineIconic", () => {
+describe("defineIconSheets", () => {
   it("resolves an alias to its contract icon", () => {
-    const icons = defineIconic(base);
+    const icons = defineIconSheets(base);
     expect(icons.resolve("home").body).toContain("path");
     expect(icons.aliases().sort()).toEqual(["home", "star"]);
   });
 
   it("resolve of an unknown alias throws", () => {
-    const icons = defineIconic(base);
+    const icons = defineIconSheets(base);
     // @ts-expect-error "ghost" is not a declared alias
     expect(() => icons.resolve("ghost")).toThrow(/unknown alias/);
   });
 
   it("apply becomes the set over the baseline and clears the override", () => {
-    const icons = defineIconic(base);
+    const icons = defineIconSheets(base);
     icons.set("star", sharpHome);
     expect(icons.dirty()).toBe(true);
 
@@ -51,7 +51,7 @@ describe("defineIconic", () => {
   });
 
   it("apply resolves against the construction-time baseline, not the active contract", () => {
-    const icons = defineIconic(base);
+    const icons = defineIconSheets(base);
     icons.apply(sharp);
     // A second apply of a bare set restores every baseline icon.
     icons.apply({ id: "plain", name: "Plain" });
@@ -59,7 +59,7 @@ describe("defineIconic", () => {
   });
 
   it("apply rejects a set overriding an unknown alias", () => {
-    const icons = defineIconic(base);
+    const icons = defineIconSheets(base);
     expect(() =>
       icons.apply({
         id: "bad",
@@ -71,7 +71,7 @@ describe("defineIconic", () => {
   });
 
   it("update merges overrides into the active definition, surviving reset", () => {
-    const icons = defineIconic(base);
+    const icons = defineIconSheets(base);
     icons.update({ home: sharpHome });
     expect(icons.resolve("home").body).toBe("<rect/>");
     icons.reset();
@@ -80,7 +80,7 @@ describe("defineIconic", () => {
   });
 
   it("set writes a user override; reset restores it", () => {
-    const icons = defineIconic(base);
+    const icons = defineIconSheets(base);
     icons.set("home", sharpHome);
     expect(icons.resolve("home").body).toBe("<rect/>");
     expect(icons.dirty()).toBe(true);
@@ -90,7 +90,7 @@ describe("defineIconic", () => {
   });
 
   it("set is a silent no-op for an unknown alias or malformed icon", () => {
-    const icons = defineIconic(base);
+    const icons = defineIconSheets(base);
     // @ts-expect-error unknown alias
     icons.set("ghost", sharpHome);
     // @ts-expect-error malformed icon
@@ -99,24 +99,24 @@ describe("defineIconic", () => {
   });
 
   it("delta reports the drift from the baseline, re-appliable through update", () => {
-    const icons = defineIconic(base);
+    const icons = defineIconSheets(base);
     icons.set("home", sharpHome);
     const drift = icons.delta();
     expect(Object.keys(drift)).toEqual(["home"]);
     expect(drift.home?.body).toBe("<rect/>");
 
-    const fresh = defineIconic(base);
+    const fresh = defineIconSheets(base);
     fresh.update(drift);
     expect(fresh.resolve("home").body).toBe("<rect/>");
   });
 
   it("delta is empty when nothing has drifted", () => {
-    const icons = defineIconic(base);
+    const icons = defineIconSheets(base);
     expect(icons.delta()).toEqual({});
   });
 
   it("create validates a set and returns it unchanged", () => {
-    const icons = defineIconic(base);
+    const icons = defineIconSheets(base);
     expect(icons.create(sharp)).toBe(sharp);
     expect(() =>
       icons.create({
@@ -129,7 +129,7 @@ describe("defineIconic", () => {
   });
 
   it("extract snapshots the effective icons under a new identity", () => {
-    const icons = defineIconic(base);
+    const icons = defineIconSheets(base);
     icons.set("home", sharpHome);
     const snapshot = icons.extract({ id: "custom", name: "Custom" });
     expect(snapshot.id).toBe("custom");

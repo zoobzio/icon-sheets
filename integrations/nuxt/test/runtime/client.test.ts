@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { ref, type Ref } from "vue";
 import { contract } from "../fixtures";
 
-vi.mock("#build/iconic.mjs", () => ({
+vi.mock("#build/icon-sheets.mjs", () => ({
   get contract() {
     return structuredClone(contract);
   },
@@ -14,22 +14,22 @@ vi.mock("#imports", () => ({
   useState: (key: string, init: () => unknown) => (states[key] ??= ref(init())),
 }));
 
-import { makeIconic } from "../../src/runtime/client";
+import { makeIconSheets } from "../../src/runtime/client";
 
 const icon = { body: "<path/>", width: 24, height: 24 };
 
-describe("makeIconic (nuxt client)", () => {
+describe("makeIconSheets (nuxt client)", () => {
   beforeEach(() => {
     states = {};
   });
 
   it("builds a service over the reactive container", () => {
-    const service = makeIconic();
+    const service = makeIconSheets();
     expect(service.resolve("home")).toEqual(contract.icons.home);
   });
 
   it("applies a set through the reactive container", () => {
-    const service = makeIconic();
+    const service = makeIconSheets();
     service.apply({ id: "sharp", name: "Sharp", icons: { home: icon } });
     expect(service.resolve("home")).toEqual(icon);
   });
