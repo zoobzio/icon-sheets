@@ -50,7 +50,7 @@ importers:
 
   examples/nuxt:
     dependencies:
-      '@icon-sheets/icon-sheets':
+      'icon-sheets':
         specifier: workspace:*
         version: link:../../packages/icon-sheets
       '@icon-sheets/nuxt':
@@ -94,7 +94,7 @@ importers:
       '@icon-sheets/catalog':
         specifier: workspace:*
         version: link:../../packages/catalog
-      '@icon-sheets/icon-sheets':
+      'icon-sheets':
         specifier: workspace:*
         version: link:../../packages/icon-sheets
       '@types/node':
@@ -103,7 +103,7 @@ importers:
 
   integrations/nuxt:
     dependencies:
-      '@icon-sheets/icon-sheets':
+      'icon-sheets':
         specifier: workspace:*
         version: link:../../packages/icon-sheets
       '@icon-sheets/iconify':

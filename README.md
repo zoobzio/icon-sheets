@@ -35,7 +35,7 @@ collection-root defaults — and emits a **contract**: a plain `icon-sheets.conf
 of resolved icon data, no collections retained.
 
 ```ts
-import { defineIconSheetsConfig } from "@icon-sheets/icon-sheets/config";
+import { defineIconSheetsConfig } from "icon-sheets/config";
 
 export default defineIconSheetsConfig({
   contract: {
@@ -50,8 +50,8 @@ The runtime engine seeds a fresh state container from that config and resolves
 an alias to its effective icon — the user override, else the active contract:
 
 ```ts
-import { makeIconSheets } from "@icon-sheets/icon-sheets";
-import { useIconSheetsConfig } from "@icon-sheets/icon-sheets/config";
+import { makeIconSheets } from "icon-sheets";
+import { useIconSheetsConfig } from "icon-sheets/config";
 import config from "./icon-sheets.config";
 
 const icons = makeIconSheets(useIconSheetsConfig(config));
@@ -77,7 +77,7 @@ elsewhere. Both `list` (discovery, filtered/paged, tag-aware) and `get`
 (retrieval, proven against the contract) behave identically:
 
 ```ts
-import { defineCatalog } from "@icon-sheets/icon-sheets/catalog";
+import { defineCatalog } from "icon-sheets/catalog";
 
 const catalog = defineCatalog(icons.schema, provider);
 const set = await catalog.get("sharp");
@@ -100,7 +100,7 @@ patches into the DOM in place after an `apply`; `sheet()` renders the whole
 sprite for build-time or SSR.
 
 ```ts
-import { defineSprite } from "@icon-sheets/icon-sheets/svg";
+import { defineSprite } from "icon-sheets/svg";
 
 const sprite = defineSprite(icons);
 sprite.href("home"); // "#home" — constant

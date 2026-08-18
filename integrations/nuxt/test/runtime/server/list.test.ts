@@ -1,4 +1,4 @@
-import type { Page } from "@icon-sheets/icon-sheets/catalog";
+import type { Page } from "icon-sheets/catalog";
 
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 

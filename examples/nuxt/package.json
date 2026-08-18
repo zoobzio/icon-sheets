@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@icon-sheets/nuxt": "workspace:*",
-    "@icon-sheets/icon-sheets": "workspace:*",
+    "icon-sheets": "workspace:*",
     "nuxt": "^4.4.6",
     "vue": "^3.5.35"
   },

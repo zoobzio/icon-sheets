@@ -1,13 +1,13 @@
-import type { Contract, Schema, Set } from "@icon-sheets/icon-sheets";
-import type { Entry } from "@icon-sheets/icon-sheets/catalog";
+import type { Contract, Schema, Set } from "icon-sheets";
+import type { Entry } from "icon-sheets/catalog";
 import type { NuxtIconSheetsConfig } from "./config";
 
 import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 
-import { defineSchema, makeIconSheets } from "@icon-sheets/icon-sheets";
-import { ROUTE } from "@icon-sheets/icon-sheets/catalog";
-import { defineSprite } from "@icon-sheets/icon-sheets/svg";
+import { defineSchema, makeIconSheets } from "icon-sheets";
+import { ROUTE } from "icon-sheets/catalog";
+import { defineSprite } from "icon-sheets/svg";
 import { resolveContract, resolveSet } from "@icon-sheets/iconify";
 import type { Req } from "@icon-sheets/iconify";
 
@@ -178,7 +178,7 @@ export default defineNuxtModule<NuxtIconSheetsConfig>({
           .map((alias) => JSON.stringify(alias))
           .join(" | ");
         return [
-          `import type { IconifyIcon } from "@icon-sheets/icon-sheets";`,
+          `import type { IconifyIcon } from "icon-sheets";`,
           `export type Alias = ${union || "never"};`,
           `export type Overrides = Partial<Record<Alias, IconifyIcon>>;`,
         ].join("\n");
@@ -196,7 +196,7 @@ export default defineNuxtModule<NuxtIconSheetsConfig>({
       write: true,
       getContents: () =>
         [
-          `import type { Identity, IconifyIcon } from "@icon-sheets/icon-sheets";`,
+          `import type { Identity, IconifyIcon } from "icon-sheets";`,
           `import type { Alias } from "./types/icon-sheets";`,
           `export const contract: Identity & { icons: Record<Alias, IconifyIcon> };`,
         ].join("\n"),

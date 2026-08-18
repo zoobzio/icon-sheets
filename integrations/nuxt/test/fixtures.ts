@@ -1,4 +1,4 @@
-import type { IconifyIcon } from "@icon-sheets/icon-sheets";
+import type { IconifyIcon } from "icon-sheets";
 
 const icon = (body: string): IconifyIcon => ({ body, width: 24, height: 24 });
 

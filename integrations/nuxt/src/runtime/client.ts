@@ -1,6 +1,6 @@
 import type { AppIconSheets } from "./types";
 
-import { makeIconSheets as makeService } from "@icon-sheets/icon-sheets";
+import { makeIconSheets as makeService } from "icon-sheets";
 import { accessIconSheets } from "./store";
 
 /**

@@ -1,5 +1,5 @@
 import { createError, defineEventHandler, getRouterParam } from "h3";
-import { ROUTE } from "@icon-sheets/icon-sheets/catalog";
+import { ROUTE } from "icon-sheets/catalog";
 import { record } from "objectively";
 import { useRuntimeConfig, useStorage } from "#imports";
 

@@ -1,6 +1,6 @@
 import type { AppConfig } from "./types";
 
-import { useIconSheetsConfig } from "@icon-sheets/icon-sheets/config";
+import { useIconSheetsConfig } from "icon-sheets/config";
 import { useState } from "#imports";
 import { contract } from "#build/icon-sheets.mjs";
 

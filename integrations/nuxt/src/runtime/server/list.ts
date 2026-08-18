@@ -1,7 +1,7 @@
-import type { Entry, Listing } from "@icon-sheets/icon-sheets/catalog";
+import type { Entry, Listing } from "icon-sheets/catalog";
 
 import { createError, defineEventHandler, getQuery } from "h3";
-import { isQuery, LIMIT, ROUTE, SORT } from "@icon-sheets/icon-sheets/catalog";
+import { isQuery, LIMIT, ROUTE, SORT } from "icon-sheets/catalog";
 import { record } from "objectively";
 import { useRuntimeConfig, useStorage } from "#imports";
 

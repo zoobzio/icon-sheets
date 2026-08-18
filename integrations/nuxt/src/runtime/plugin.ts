@@ -1,6 +1,6 @@
 import { defineNuxtPlugin } from "#app";
 import { watchEffect } from "vue";
-import { defineSprite } from "@icon-sheets/icon-sheets/svg";
+import { defineSprite } from "icon-sheets/svg";
 import { makeIconSheets } from "./client";
 import { CONTAINER } from "../constant";
 

@@ -49,7 +49,7 @@ await writeFile(set.filename, set.contents); // solid.set.json
 The emitted `icon-sheets.config.ts`:
 
 ```ts
-import { defineIconSheetsConfig } from "@icon-sheets/icon-sheets/config";
+import { defineIconSheetsConfig } from "icon-sheets/config";
 
 export default defineIconSheetsConfig({
   contract: {

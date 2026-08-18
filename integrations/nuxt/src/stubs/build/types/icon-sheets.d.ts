@@ -1,5 +1,5 @@
 // Typecheck-only stub for the generated `#build/types/icon-sheets.d.ts` virtual module.
-import type { IconifyIcon } from "@icon-sheets/icon-sheets";
+import type { IconifyIcon } from "icon-sheets";
 
 export type Alias = "home" | "save";
 

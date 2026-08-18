@@ -1,4 +1,4 @@
-import type { Identity } from "@icon-sheets/icon-sheets";
+import type { Identity } from "icon-sheets";
 
 /**
  * An alias map authored as icon *refs* — `home: "lucide:home"`, or

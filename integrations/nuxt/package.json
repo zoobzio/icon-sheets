@@ -1,6 +1,6 @@
 {
   "name": "@icon-sheets/nuxt",
-  "version": "0.1.0",
+  "version": "0.0.0",
   "type": "module",
   "main": "./.dist/module.mjs",
   "types": "./.dist/module.d.ts",
@@ -32,7 +32,7 @@
     "@icon-sheets/iconify": "workspace:*",
     "@nuxt/kit": "^4.4.6",
     "h3": "^1.15.11",
-    "@icon-sheets/icon-sheets": "workspace:*",
+    "icon-sheets": "workspace:*",
     "objectively": "^0.1.1",
     "vue": "^3.5.35"
   },

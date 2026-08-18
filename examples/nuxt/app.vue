@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import type { Page } from "@icon-sheets/icon-sheets/catalog";
-import { defineClient } from "@icon-sheets/icon-sheets/catalog";
+import type { Page } from "icon-sheets/catalog";
+import { defineClient } from "icon-sheets/catalog";
 
 const icons = useIconSheets();
 const catalog = defineClient(icons.schema, { base: "/api/icon-sheets" });

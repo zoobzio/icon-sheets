@@ -6,7 +6,7 @@ import type {
   IconSheets,
   Overrides,
   Set,
-} from "@icon-sheets/icon-sheets";
+} from "icon-sheets";
 
 /**
  * The active contract, its alias keys derived from the build-time union. Keyed
