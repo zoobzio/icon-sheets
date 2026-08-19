@@ -1,5 +1,16 @@
 # icon-sheets
 
+## 0.0.2
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @icon-sheets/core@0.0.2
+  - @icon-sheets/schema@0.0.2
+  - @icon-sheets/utils@0.0.2
+  - @icon-sheets/svg@0.0.2
+  - @icon-sheets/catalog@0.0.2
+
 ## 0.0.1
 
 ### Patch Changes
