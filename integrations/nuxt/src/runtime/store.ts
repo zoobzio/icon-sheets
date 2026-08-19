@@ -1,4 +1,4 @@
-import type { AppConfig } from "./types";
+import type { AppIconSheetsConfig } from "./types";
 
 import { useIconSheetsConfig } from "icon-sheets/config";
 import { useState } from "#imports";
@@ -10,7 +10,7 @@ import { contract } from "#build/icon-sheets.mjs";
  * never a reference SSR writes could reach across requests.
  */
 export const accessIconSheets = () => {
-  const config = useState<AppConfig>("icon-sheets:config", () =>
+  const config = useState<AppIconSheetsConfig>("icon-sheets:config", () =>
     useIconSheetsConfig({ contract }),
   );
 

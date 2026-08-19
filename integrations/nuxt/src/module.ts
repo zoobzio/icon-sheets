@@ -223,10 +223,10 @@ export default defineNuxtModule<NuxtIconSheetsConfig>({
         name: "accessIconSheets",
       },
       ...[
-        "AppContract",
-        "AppSet",
-        "AppOverrides",
-        "AppConfig",
+        "AppIconSheetsContract",
+        "AppIconSheetsSet",
+        "AppIconSheetsOverrides",
+        "AppIconSheetsConfig",
         "AppIconSheets",
       ].map((name) => ({
         from: resolver.resolve("./runtime/types"),
