@@ -1,6 +1,11 @@
 {
   "name": "@icon-sheets/nuxt",
   "version": "0.0.2",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zoobzio/icon-sheets.git",
+    "directory": "integrations/nuxt"
+  },
   "type": "module",
   "main": "./.dist/module.mjs",
   "types": "./.dist/module.d.ts",

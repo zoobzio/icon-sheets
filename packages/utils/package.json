@@ -1,6 +1,11 @@
 {
   "name": "@icon-sheets/utils",
   "version": "0.0.2",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zoobzio/icon-sheets.git",
+    "directory": "packages/utils"
+  },
   "type": "module",
   "main": "./.dist/index.mjs",
   "types": "./.dist/index.d.ts",
