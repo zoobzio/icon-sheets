@@ -1,6 +1,6 @@
 {
   "name": "@icon-sheets/core",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "The icon-sheets runtime service — resolve aliases, apply sets, layer user overrides",
   "license": "MIT",
   "repository": {

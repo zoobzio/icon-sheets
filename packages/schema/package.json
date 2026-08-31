@@ -1,6 +1,6 @@
 {
   "name": "@icon-sheets/schema",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Contract types and runtime validation for icon-sheets",
   "license": "MIT",
   "repository": {

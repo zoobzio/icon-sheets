@@ -1,6 +1,6 @@
 {
   "name": "@icon-sheets/catalog",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Icon set discovery and retrieval for icon-sheets — one interface, served locally or over HTTP",
   "license": "MIT",
   "repository": {

@@ -1,5 +1,16 @@
 # @icon-sheets/iconify
 
+## 0.0.4
+
+### Patch Changes
+
+- [`fa835a6`](https://github.com/zoobzio/icon-sheets/commit/fa835a6295d7dfcee4901e2e233c210255fb924b) Thanks [@zoobzio](https://github.com/zoobzio)! - Rewrite package READMEs to match the shipped API (removes stale scaffold
+  notices and references to non-existent exports), add the missing
+  `@icon-sheets/catalog` README, and add `description` and `license` metadata to
+  every package.
+- Updated dependencies [[`fa835a6`](https://github.com/zoobzio/icon-sheets/commit/fa835a6295d7dfcee4901e2e233c210255fb924b)]:
+  - @icon-sheets/schema@0.0.4
+
 ## 0.0.3
 
 ### Patch Changes

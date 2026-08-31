@@ -1,6 +1,6 @@
 {
   "name": "@icon-sheets/nuxt",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Nuxt module for icon-sheets — build-time icon resolution, SSR sprite inlining, typed Icon component, runtime set switching",
   "license": "MIT",
   "repository": {

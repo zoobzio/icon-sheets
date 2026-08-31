@@ -1,6 +1,6 @@
 {
   "name": "@icon-sheets/svg",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "SVG sprite renderer for icon-sheets",
   "license": "MIT",
   "repository": {
