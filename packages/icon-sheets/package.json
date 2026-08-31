@@ -1,6 +1,8 @@
 {
   "name": "icon-sheets",
   "version": "0.0.3",
+  "description": "Type-safe SVG sprite icons — resolved from Iconify at build time, swappable as whole sets at runtime",
+  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/zoobzio/icon-sheets.git",

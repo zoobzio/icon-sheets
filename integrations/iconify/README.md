@@ -1,15 +1,12 @@
 # @icon-sheets/iconify
 
-Codegen from an authored **ref config** to an `icon-sheets.config.ts` contract of
-resolved icon literals — and from a ref map to a **set** JSON document. The
-build-layer analog of icon-sheets's runtime: it holds all the IconifyJSON handling —
-loading collections, flattening alias chains, merging transforms — so the
-runtime carries none of it.
-
-You name the icons an app uses by their Iconify reference; `generate()` resolves
-each one into a self-contained icon definition literal and emits a contract the
-runtime consumes directly. `generateSet()` does the same for a switchable set —
-the catalog payload an `apply` consumes.
+The build layer. You name the icons an app uses by their Iconify reference;
+`generate()` resolves each one into a self-contained icon definition and emits
+the `icon-sheets.config.ts` contract the runtime consumes directly.
+`generateSet()` does the same for a switchable set, emitting the JSON document
+a catalog serves. All Iconify JSON handling — loading collections, flattening
+alias chains, merging transforms — happens here, once, so the runtime carries
+none of it.
 
 ## Ref grammar
 
@@ -78,7 +75,7 @@ The emitted `solid.set.json` — the catalog payload:
   `alias → ref`.
 - `generateSet` membership-checks each ref key against the contract's `aliases`
   before resolving — a set may only rebind aliases the contract declares.
-- The assembled document is validated through `@icon-sheets/schema` before emission;
-  a failure there is a resolution bug or a bad config, cited to the ref.
+- The assembled document is validated through `@icon-sheets/schema` before
+  emission; a failure there points at the offending ref.
 - `$/` responses are trusted, not sanitized — untrusted sources are a separate
   concern.

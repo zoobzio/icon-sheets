@@ -1,6 +1,8 @@
 {
   "name": "@icon-sheets/catalog",
   "version": "0.0.3",
+  "description": "Icon set discovery and retrieval for icon-sheets — one interface, served locally or over HTTP",
+  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/zoobzio/icon-sheets.git",

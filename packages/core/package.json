@@ -1,6 +1,8 @@
 {
   "name": "@icon-sheets/core",
   "version": "0.0.3",
+  "description": "The icon-sheets runtime service — resolve aliases, apply sets, layer user overrides",
+  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/zoobzio/icon-sheets.git",

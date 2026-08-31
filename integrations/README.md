@@ -1,7 +1,9 @@
 # Integrations
 
-Bridges between icon-sheets and host frameworks. Each integration depends only on the public [`icon-sheets`](../packages/icon-sheets) package — never on the internal `@icon-sheets/*` subpackages — so core internals stay free to change.
+Bridges between icon-sheets and the outside world: the build-time generator
+that resolves Iconify references, and framework modules.
 
-| Integration                   | Directory           | Description                  |
-| ----------------------------- | ------------------- | ---------------------------- |
-| [`@icon-sheets/nuxt`](./nuxt) | `integrations/nuxt` | Nuxt module for icon sprites |
+| Integration                         | Directory              | Description                                                               |
+| ----------------------------------- | ---------------------- | ------------------------------------------------------------------------- |
+| [`@icon-sheets/iconify`](./iconify) | `integrations/iconify` | Build-time codegen — resolves Iconify refs into contracts and sets        |
+| [`@icon-sheets/nuxt`](./nuxt)       | `integrations/nuxt`    | Nuxt module — build-time resolution, SSR sprite, `<Icon>`, catalog routes |

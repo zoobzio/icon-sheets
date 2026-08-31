@@ -1,10 +1,10 @@
 # @icon-sheets/nuxt
 
-Nuxt module for icon-sheets. At build time it resolves the icon refs configured in
-`nuxt.config` against the Iconify collections into a flat contract, derives the
-`Alias` union for autocompletion, inlines an SVG sprite sheet server-side, and
-registers the runtime `<Icon>` component, the `useIconSheets` composable, and a
-catalog served over the wire protocol.
+Nuxt module for icon-sheets. At build time it resolves the icon refs in
+`nuxt.config` into a flat contract and derives the `Alias` union for
+autocompletion. At runtime it inlines the SVG sprite server-side, registers
+the `<Icon>` component and the `useIconSheets()` composable, and serves
+switchable sets through catalog routes.
 
 ## Usage
 
@@ -50,8 +50,8 @@ icons.resolve("home"); // the resolved icon literal
 
 Sets are discovered and retrieved through the catalog the module mounts at
 `/api/icon-sheets/sets`; `apply` swaps the active document and the sprite re-renders in
-place (the `<use href="#alias">` never changes). A selection does not yet persist
-across reloads — that lands with SSR-safe restoration later.
+place (the `<use href="#alias">` never changes). Set selection does not yet
+persist across reloads.
 
 ## Remote catalog & auth
 

@@ -1,6 +1,8 @@
 {
   "name": "@icon-sheets/iconify",
   "version": "0.0.3",
+  "description": "Build-time codegen for icon-sheets — resolves Iconify references into contracts and sets",
+  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/zoobzio/icon-sheets.git",

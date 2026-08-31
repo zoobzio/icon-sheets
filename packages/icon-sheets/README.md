@@ -1,13 +1,13 @@
 # icon-sheets
 
-The public umbrella package. Re-exports the core engine (`defineIconSheets`) at the
-root and the rest of the library behind subpaths, so integrations depend on
-this one package rather than the internal `@icon-sheets/*` set.
+The public package. Everything an app or integration consumes is exported
+here, so the internal `@icon-sheets/*` packages stay free to change.
 
-| Import               | Provides                                   |
-| -------------------- | ------------------------------------------ |
-| `icon-sheets`        | The icon engine — `defineIconSheets`       |
-| `icon-sheets/svg`    | The SVG sprite renderer — `defineSprite`   |
-| `icon-sheets/config` | Config types and the `defineConfig` helper |
+| Import                | Provides                                                                                        |
+| --------------------- | ----------------------------------------------------------------------------------------------- |
+| `icon-sheets`         | The runtime service — `makeIconSheets` / `defineIconSheets` — plus the schema types and helpers |
+| `icon-sheets/config`  | `defineIconSheetsConfig` for the emitted contract file, `useIconSheetsConfig` to seed a service |
+| `icon-sheets/catalog` | Set discovery and retrieval — `defineCatalog` / `defineClient`                                  |
+| `icon-sheets/svg`     | The sprite renderer — `defineSprite`                                                            |
 
-> Scaffold — implementation pending.
+See the [repository README](../../README.md) for the full picture.

@@ -1,6 +1,8 @@
 {
   "name": "@icon-sheets/utils",
   "version": "0.0.3",
+  "description": "Data helpers shared by the icon-sheets packages",
+  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/zoobzio/icon-sheets.git",

@@ -1,6 +1,8 @@
 {
   "name": "@icon-sheets/svg",
   "version": "0.0.3",
+  "description": "SVG sprite renderer for icon-sheets",
+  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/zoobzio/icon-sheets.git",

@@ -1,6 +1,8 @@
 {
   "name": "@icon-sheets/nuxt",
   "version": "0.0.3",
+  "description": "Nuxt module for icon-sheets — build-time icon resolution, SSR sprite inlining, typed Icon component, runtime set switching",
+  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/zoobzio/icon-sheets.git",
