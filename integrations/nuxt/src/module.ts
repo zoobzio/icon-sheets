@@ -8,7 +8,7 @@ import { join } from "node:path";
 import { defineSchema, makeIconSheets } from "icon-sheets";
 import { ROUTE } from "icon-sheets/catalog";
 import { defineSprite } from "icon-sheets/svg";
-import { resolveContract, resolveSet } from "@icon-sheets/iconify";
+import { resolveAll } from "@icon-sheets/iconify";
 import type { Req } from "@icon-sheets/iconify";
 
 import {
@@ -82,33 +82,43 @@ export default defineNuxtModule<NuxtIconSheetsConfig>({
         }
       : undefined;
 
-    const contract = await resolveContract({
+    /*
+     * A set's key is its id — the identity the wire protocol lists and retrieves
+     * by. One carrying its own `id` is rejected rather than guessed at, so a key
+     * and an id can never disagree.
+     */
+    const authored = Object.entries(options.sets ?? {});
+    for (const [id, set] of authored) {
+      if ("id" in set) {
+        throw new Error(
+          `icon-sheets: set "${id}" in \`iconSheets.sets\` declares an "id" — its key is its id.`,
+        );
+      }
+    }
+
+    /*
+     * The contract and every set, resolved in one pass so each Iconify
+     * collection is acquired once however many sets draw from it.
+     */
+    const { contract, sets } = await resolveAll({
       req,
       config: {
         id: options.id ?? "app",
         name: options.name ?? "App Icons",
         icons: options.icons,
       },
+      sets: authored.map(([id, set]) => ({ id, ...set })),
     });
 
     const schema: Schema<Contract> = defineSchema(contract);
-    const aliases = Object.keys(contract.icons);
 
     /*
-     * The catalog, re-keyed by each set's own id — the identity the wire protocol
-     * lists and retrieves by. Every set is resolved and proven against the
-     * contract here, so the routes serve stored payloads without re-proving.
+     * The catalog, keyed by set id. Every set is proven against the contract
+     * here, so the routes serve stored payloads without re-proving.
      */
     const catalog: Record<string, Set> = {};
-    for (const ref of Object.values(options.sets ?? {})) {
-      const { icons, ...identity } = ref;
-      const set = await resolveSet({ req, identity, aliases, icons });
+    for (const set of sets) {
       schema.assert.set(set);
-      if (set.id in catalog) {
-        throw new Error(
-          `icon-sheets: duplicate set id "${set.id}" in \`icon-sheets.sets\`.`,
-        );
-      }
       catalog[set.id] = set;
     }
 

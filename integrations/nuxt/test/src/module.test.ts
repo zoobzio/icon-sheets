@@ -24,19 +24,21 @@ vi.mock("@nuxt/kit", () => ({
 }));
 
 // Resolution is exercised by @icon-sheets/iconify's own tests; here it is stubbed so
-// the module runs offline. `resolveSet` echoes the identity with a single
+// the module runs offline. `resolveAll` echoes each set's identity with a single
 // resolved icon, so any authored set id flows through to the catalog.
 vi.mock("@icon-sheets/iconify", () => ({
-  resolveContract: vi.fn(async () => structuredClone(contract)),
-  resolveSet: vi.fn(
-    async ({ identity }: { identity: { id: string; name: string } }) => ({
-      ...identity,
-      icons: { home: { body: "<path/>", width: 24, height: 24 } },
+  resolveAll: vi.fn(
+    async ({ sets }: { sets: { id: string; name: string }[] }) => ({
+      contract: structuredClone(contract),
+      sets: sets.map((set) => ({
+        ...set,
+        icons: { home: { body: "<path/>", width: 24, height: 24 } },
+      })),
     }),
   ),
 }));
 
-import { resolveContract, resolveSet } from "@icon-sheets/iconify";
+import { resolveAll } from "@icon-sheets/iconify";
 import module from "../../src/module";
 
 interface FakeNuxt {
@@ -98,15 +100,37 @@ describe("icon-sheets module", () => {
     await expect(mod.setup(missing, nuxt)).rejects.toThrow(/no icons/);
   });
 
-  it("rejects duplicate set ids in the catalog", async () => {
-    const dupes = {
+  it("rejects a set that declares its own id", async () => {
+    const stale = {
       ...options,
       sets: {
-        one: { id: "dup", name: "One", icons: { home: "lucide:home" } },
-        two: { id: "dup", name: "Two", icons: { home: "lucide:home" } },
+        one: { id: "other", name: "One", icons: { home: "lucide:home" } },
       },
     };
-    await expect(mod.setup(dupes, nuxt)).rejects.toThrow(/duplicate set id/);
+    await expect(mod.setup(stale, nuxt)).rejects.toThrow(
+      /set "one" .* declares an "id"/,
+    );
+    expect(resolveAll).not.toHaveBeenCalled();
+  });
+
+  it("resolves the contract and every set in one pass, keyed by set id", async () => {
+    await mod.setup(options, nuxt);
+    expect(resolveAll).toHaveBeenCalledTimes(1);
+    const passed = vi.mocked(resolveAll).mock.calls[0][0];
+    expect(passed.config).toEqual({
+      id: "app",
+      name: "App Icons",
+      icons: options.icons,
+    });
+    expect(passed.sets).toEqual([
+      { id: "sharp", name: "Sharp", icons: { home: "lucide:home" } },
+      {
+        id: "round",
+        name: "Round",
+        tags: ["soft"],
+        icons: { home: "lucide:home-round" },
+      },
+    ]);
   });
 
   it("writes the catalog manifest and payloads on build:before", async () => {
@@ -209,19 +233,15 @@ describe("icon-sheets module", () => {
     expect(names).toContain("useIconSheets");
   });
 
-  it("threads a bearer request loader to the resolvers only when the token env is set", async () => {
+  it("threads a bearer request loader to the resolver only when the token env is set", async () => {
     await mod.setup(options, nuxt);
-    expect(vi.mocked(resolveContract).mock.calls[0][0].req).toBeUndefined();
-    expect(vi.mocked(resolveSet).mock.calls[0][0].req).toBeUndefined();
+    expect(vi.mocked(resolveAll).mock.calls[0][0].req).toBeUndefined();
 
     vi.clearAllMocks();
     process.env.NUXT_ICON_SHEETS_TOKEN = "secret";
     try {
       await mod.setup(options, nuxt);
-      expect(typeof vi.mocked(resolveContract).mock.calls[0][0].req).toBe(
-        "function",
-      );
-      expect(typeof vi.mocked(resolveSet).mock.calls[0][0].req).toBe(
+      expect(typeof vi.mocked(resolveAll).mock.calls[0][0].req).toBe(
         "function",
       );
     } finally {

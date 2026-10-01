@@ -16,6 +16,30 @@ export type Source<C extends Contract> = {
 };
 
 /**
+ * Options fixed when a sprite is defined.
+ */
+export type SpriteOptions = {
+  /**
+   * Prepended to every symbol id (and so to every `href`) — `"ui-"` renders
+   * `<symbol id="ui-home">`. Lets several sprites share one document without
+   * their ids colliding. Defaults to no prefix.
+   */
+  prefix?: string;
+};
+
+/**
+ * Options for rendering a full sheet.
+ */
+export type SheetOptions = {
+  /**
+   * Whether the root `<svg>` carries `style="display:none"` — right for a
+   * sprite inlined into a page, wrong for a standalone `sprite.svg` file
+   * referenced as `<use href="/sprite.svg#home">`. Defaults to `true`.
+   */
+  hidden?: boolean;
+};
+
+/**
  * An SVG sprite service over a contract. Every symbol is keyed by its alias
  * (`id="home"`) with no namespacing: applying a set or writing an override
  * changes what an alias *resolves to*, not its id, so a `<use href="#home">`
@@ -37,5 +61,5 @@ export type Sprite<C extends Contract> = {
   symbols(aliases: Alias<C>[]): string;
 
   /* The full sprite: one `<symbol>` per alias — the build-time / SSR artifact. */
-  sheet(): string;
+  sheet(options?: SheetOptions): string;
 };

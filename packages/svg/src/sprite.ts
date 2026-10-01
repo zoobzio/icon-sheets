@@ -2,7 +2,7 @@ import { iconToSVG } from "@iconify/utils";
 
 import type { Alias, Contract } from "@icon-sheets/schema";
 
-import type { Source, Sprite } from "./types";
+import type { SheetOptions, Source, Sprite, SpriteOptions } from "./types";
 
 /**
  * Builds an SVG sprite from an icon-sheets service (or any structural {@link Source}).
@@ -14,27 +14,36 @@ import type { Source, Sprite } from "./types";
  * set or user overrides change; only the symbol body does. `symbols` renders a
  * chosen subset, the partial batch an integration swaps into the DOM in place
  * after an `apply` / `update`; `sheet` renders every alias, the build-time or
- * SSR artifact.
+ * SSR artifact. An optional `prefix` namespaces every id the same way, so the
+ * constant-`href` property holds under it.
  *
  * @param source - The service the sprite reads aliases and resolved icons from.
+ * @param options - The id prefix.
  */
 export const defineSprite = <C extends Contract>(
   source: Source<C>,
+  options: SpriteOptions = {},
 ): Sprite<C> => {
+  const prefix = options.prefix ?? "";
+
+  const id = (alias: Alias<C>): string => `${prefix}${alias}`;
+
   const symbol = (alias: Alias<C>): string => {
     const { attributes, body } = iconToSVG(source.resolve(alias));
-    return `<symbol id="${alias}" viewBox="${attributes.viewBox}">${body}</symbol>`;
+    return `<symbol id="${id(alias)}" viewBox="${attributes.viewBox}">${body}</symbol>`;
   };
 
   const symbols = (aliases: Alias<C>[]): string =>
     aliases.map((alias) => symbol(alias)).join("");
 
-  const href = (alias: Alias<C>): string => `#${alias}`;
+  const href = (alias: Alias<C>): string => `#${id(alias)}`;
 
-  const sheet = (): string =>
-    `<svg xmlns="http://www.w3.org/2000/svg" style="display:none">${symbols(
+  const sheet = ({ hidden = true }: SheetOptions = {}): string => {
+    const style = hidden ? ' style="display:none"' : "";
+    return `<svg xmlns="http://www.w3.org/2000/svg"${style}>${symbols(
       source.aliases(),
     )}</svg>`;
+  };
 
   return { href, symbol, symbols, sheet };
 };

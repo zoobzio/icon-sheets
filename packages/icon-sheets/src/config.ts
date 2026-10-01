@@ -5,9 +5,9 @@ import { clone } from "@icon-sheets/utils";
 
 /**
  * An application's icon-sheets configuration: the base contract — identity plus every
- * semantic alias mapped to its resolved icon definition literal. The canonical
- * shape the `@icon-sheets/iconify` build layer emits into an `icon-sheets.config.ts`, and
- * the input {@link useIconSheetsConfig} seeds a runtime container from.
+ * semantic alias mapped to its resolved icon definition literal. The shape
+ * `@icon-sheets/kit` emits as a generated `config` module, and the input
+ * {@link useIconSheetsConfig} seeds a runtime container from.
  */
 export interface IconSheetsConfig<C extends Contract = Contract> {
   /** The base contract: identity plus the icons map. */
@@ -16,8 +16,8 @@ export interface IconSheetsConfig<C extends Contract = Contract> {
 
 /**
  * Identity helper that types an icon-sheets configuration and infers the alias union
- * from `contract`, so a consumer of the generated `icon-sheets.config.ts` gets the
- * exact contract back without restating it. It does nothing at runtime but carry
+ * from `contract`, so a hand-written or in-memory resolved config gets the exact
+ * contract back without restating it. It does nothing at runtime but carry
  * the inferred types.
  *
  * @param config - The icon-sheets configuration.

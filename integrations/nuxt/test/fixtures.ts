@@ -16,13 +16,12 @@ export const contract = {
 };
 
 /**
- * The ref sets an app authors under `iconSheets.sets`, keyed for authoring
- * convenience. `round` carries discovery tags; `sharp` does not.
+ * The ref sets an app authors under `iconSheets.sets`, keyed by set id.
+ * `round` carries discovery tags; `sharp` does not.
  */
 export const sets = {
-  sharp: { id: "sharp", name: "Sharp", icons: { home: "lucide:home" } },
+  sharp: { name: "Sharp", icons: { home: "lucide:home" } },
   round: {
-    id: "round",
     name: "Round",
     tags: ["soft"],
     icons: { home: "lucide:home-round" },

@@ -43,4 +43,19 @@ describe("defineSprite", () => {
     };
     expect(defineSprite(source).symbol("home")).toContain("transform");
   });
+
+  it("hides the sheet by default and drops the style when hidden is false", () => {
+    const sprite = defineSprite(make());
+    expect(sprite.sheet()).toMatch(/^<svg [^>]*style="display:none"/);
+    expect(sprite.sheet({ hidden: false })).not.toContain("display:none");
+    expect(sprite.sheet({ hidden: false })).toContain('<symbol id="home"');
+  });
+
+  it("namespaces every id and href under a prefix", () => {
+    const sprite = defineSprite(make(), { prefix: "ui-" });
+    expect(sprite.href("home")).toBe("#ui-home");
+    expect(sprite.symbol("home")).toContain('<symbol id="ui-home"');
+    expect(sprite.sheet()).toContain('<symbol id="ui-star"');
+    expect(sprite.sheet()).not.toContain('id="home"');
+  });
 });

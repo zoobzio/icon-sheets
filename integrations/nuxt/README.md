@@ -22,9 +22,9 @@ export default defineNuxtConfig({
       home: "lucide:home",
       save: "lucide:content-save",
     },
-    // Optional switchable sets, served over the catalog.
+    // Optional switchable sets, served over the catalog. A set's key is its id.
     sets: {
-      sharp: { id: "sharp", name: "Sharp", icons: { home: "lucide:home" } },
+      sharp: { name: "Sharp", icons: { home: "lucide:home" } },
     },
   },
 });

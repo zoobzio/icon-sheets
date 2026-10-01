@@ -1,11 +1,11 @@
-import type { IconifyIcon, Identity } from "@icon-sheets/schema";
+import type { Contract, IconifyIcon, Identity, Set } from "@icon-sheets/schema";
 
 /**
- * The authored ref config: the input to {@link generate}. Identity plus an
+ * The authored ref config: the input to {@link resolveContract}. Identity plus an
  * `icons` map whose values are ref *strings* rather than icon literals —
  * `prefix:name` to draw from an Iconify collection, or `$/host/path` to fetch a
  * single icon from a URL. The build layer resolves every ref into an icon
- * literal; the contract it emits is the resolved form under the same identity.
+ * literal; the contract it returns is the resolved form under the same identity.
  */
 export type RefConfig = Identity & {
   /** Each semantic alias mapped to its icon ref string. */
@@ -27,7 +27,7 @@ export type ParsedRef =
  * nothing the resolver can supply (a collected miss). A resolver may throw for a
  * hard failure — a malformed response, an unreachable endpoint — which aborts
  * generation rather than being collected. Keyed by scheme in
- * {@link GenerateOptions.resolvers}, so a caller can override the built-in
+ * {@link SharedOptions.resolvers}, so a caller can override the built-in
  * `iconify` / `url` behaviour.
  */
 export type SchemeResolver = (ref: ParsedRef) => Promise<IconifyIcon | null>;
@@ -40,9 +40,9 @@ export type SchemeResolver = (ref: ParsedRef) => Promise<IconifyIcon | null>;
 export type Req = (src: URL) => Promise<string>;
 
 /**
- * The I/O and resolver hooks shared by {@link generate} and
- * {@link generateSet}. The caller owns all I/O: `req` intercepts every network
- * fetch, and the returned contents are never written to disk here.
+ * The I/O and resolver hooks shared by {@link resolveContract},
+ * {@link resolveSet} and {@link resolveAll}. `req` intercepts every network fetch; nothing is ever
+ * written to disk here.
  */
 export type SharedOptions = {
   /**
@@ -50,9 +50,6 @@ export type SharedOptions = {
    * defaults to the process working directory.
    */
   cwd?: string;
-
-  /** The emitted filename; each entry point has its own default. */
-  filename?: string;
 
   /** The document loader; defaults to plain `fetch`. */
   req?: Req;
@@ -65,20 +62,19 @@ export type SharedOptions = {
 };
 
 /**
- * Options for {@link generate}: the authored ref config plus the shared I/O
- * hooks. Emits an `icon-sheets.config.ts` carrying the resolved contract.
+ * Options for {@link resolveContract}: the authored ref config plus the shared
+ * I/O hooks.
  */
-export type GenerateOptions = SharedOptions & {
+export type ResolveOptions = SharedOptions & {
   config: RefConfig;
 };
 
 /**
- * Options for {@link generateSet}: the set's identity, the contract's alias list
- * the refs are membership-checked against, and the ref map to resolve. Emits the
- * Set document as JSON — the catalog payload an `apply` consumes.
+ * Options for {@link resolveSet}: the set's identity, the contract's alias list
+ * the refs are membership-checked against, and the ref map to resolve.
  */
-export type GenerateSetOptions = SharedOptions & {
-  /** The identity the emitted set carries. */
+export type ResolveSetOptions = SharedOptions & {
+  /** The identity the resolved set carries. */
   identity: Identity;
 
   /** The contract's aliases — every ref key must name one of these. */
@@ -89,12 +85,32 @@ export type GenerateSetOptions = SharedOptions & {
 };
 
 /**
- * What the generators return: the emitted filename and the file text. The caller
- * owns writing it to disk.
+ * A switchable set authored as refs: identity plus a ref map rebinding a subset
+ * of a {@link RefConfig}'s aliases. The input form of a {@link Set} document.
  */
-export type GenerateResult = {
-  filename: string;
-  contents: string;
+export type RefSet = Identity & {
+  /** Each alias the set rebinds mapped to its icon ref string. */
+  icons: Record<string, string>;
+};
+
+/**
+ * Options for {@link resolveAll}: the authored ref config and the sets layered
+ * over it, plus the shared I/O hooks.
+ */
+export type ResolveAllOptions = SharedOptions & {
+  config: RefConfig;
+
+  /** The sets to resolve — every ref key must name one of the config's aliases. */
+  sets: RefSet[];
+};
+
+/**
+ * What {@link resolveAll} returns: the resolved contract, and the resolved Set
+ * documents in the order their refs were given.
+ */
+export type Resolved = {
+  contract: Contract;
+  sets: Set[];
 };
 
 /**

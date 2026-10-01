@@ -19,7 +19,6 @@ export default defineNuxtConfig({
     },
     sets: {
       material: {
-        id: "material",
         name: "Material Design",
         icons: {
           home: "mdi:home",
@@ -33,7 +32,6 @@ export default defineNuxtConfig({
         },
       },
       tabler: {
-        id: "tabler",
         name: "Tabler",
         icons: {
           home: "tabler:home",
@@ -47,7 +45,6 @@ export default defineNuxtConfig({
         },
       },
       phosphor: {
-        id: "phosphor",
         name: "Phosphor",
         icons: {
           home: "ph:house",
