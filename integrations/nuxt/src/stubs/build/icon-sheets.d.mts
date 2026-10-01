@@ -3,3 +3,5 @@ import type { Identity, IconifyIcon } from "icon-sheets";
 import type { Alias } from "./types/icon-sheets";
 
 export declare const contract: Identity & { icons: Record<Alias, IconifyIcon> };
+
+export declare const prefix: string;

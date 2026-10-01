@@ -1,6 +1,9 @@
 import { resolveAll } from "@icon-sheets/iconify";
 
 import type { GenerateOptions, Kit, KitConfig } from "./types";
+import { OUT_DIR } from "./constant";
+import { normalize } from "./path";
+import { validate } from "./validate";
 
 /** Drops the unset entries of a set's partial ref map. */
 const defined = (
@@ -13,20 +16,23 @@ const defined = (
   );
 
 /**
- * Resolves a config into a {@link Kit} through `@icon-sheets/iconify`: the
- * contract and every set in one pass, so each collection is acquired once
- * however many sets draw from it. The only step that reads the network or local
- * `@iconify-json/*` packages.
+ * Checks a config and resolves it into a {@link Kit} through
+ * `@icon-sheets/iconify`: the contract and every set in one pass, so each
+ * collection is acquired once however many sets draw from it. The only step
+ * that reads the network or local `@iconify-json/*` packages. No filesystem
+ * writes — {@link generate} turns the result into files; a caller that wants
+ * the documents themselves stops here.
  *
- * @param config - The kit config, less its `outDir` — where the files land is
- * the output's concern, not the kit's.
+ * @param config - The kit config.
  * @param options - The I/O and resolver hooks passed to `@icon-sheets/iconify`.
+ * @throws InvalidConfigError when the config breaks a rule, before resolving.
  */
 export const resolveKit = async (
-  config: Omit<KitConfig, "outDir">,
-  options: GenerateOptions,
+  config: KitConfig,
+  options: GenerateOptions = {},
 ): Promise<Kit> => {
-  const { sets = {}, prefix = "", ...refs } = config;
+  validate(config);
+  const { sets = {}, prefix = "", outDir = OUT_DIR, ...refs } = config;
 
   const resolved = await resolveAll({
     ...options,
@@ -38,5 +44,5 @@ export const resolveKit = async (
     })),
   });
 
-  return { ...resolved, prefix };
+  return { ...resolved, prefix, outDir: normalize(outDir) };
 };

@@ -9,7 +9,7 @@ none of it.
 
 This package resolves; it does not write files. Generating a project's or a
 preset's modules and sprites is [`@icon-sheets/kit`](../../packages/kit)'s job,
-and the Nuxt module resolves in memory at build time — both call into here.
+and it is the kit that calls into here; the Nuxt module goes through the kit.
 
 ## Ref grammar
 

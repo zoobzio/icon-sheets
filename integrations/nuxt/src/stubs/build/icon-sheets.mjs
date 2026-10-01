@@ -1,4 +1,6 @@
 // Runtime stub for the generated `#build/icon-sheets.mjs` virtual module.
+export const prefix = "";
+
 export const contract = {
   id: "app",
   name: "App Icons",

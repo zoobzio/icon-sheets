@@ -63,9 +63,11 @@ export type BuildOptions = Omit<GenerateOptions, "cwd"> & {
 };
 
 /**
- * A config resolved: every ref turned into its icon literal. The one value the
- * emitters read — each takes a kit and returns the files it is responsible for,
- * so nothing downstream of resolution sees a ref or touches the network.
+ * A config resolved: every ref turned into its icon literal, and every optional
+ * field settled. What {@link resolveKit} returns — the one value the emitters
+ * read, and the in-memory form a consumer that wants documents rather than
+ * files (a framework module) works from. Nothing downstream of it sees a ref or
+ * touches the network.
  */
 export type Kit = {
   /** The resolved base contract: the config's identity plus every alias's icon. */
@@ -76,6 +78,9 @@ export type Kit = {
 
   /** The symbol id prefix; empty when the config sets none. */
   prefix: string;
+
+  /** The output directory, normalized and relative to the project root. */
+  outDir: string;
 };
 
 /** One emitted file, its path relative to the output directory. */

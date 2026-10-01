@@ -13,18 +13,26 @@ changes. Icon names autocomplete, and a typo fails to compile.
 
 ```sh
 pnpm add @icon-sheets/nuxt
+pnpm add -D @icon-sheets/kit
+```
+
+Name the icons by Iconify reference:
+
+```ts
+// icon-sheets.config.ts
+import { defineConfig } from "@icon-sheets/kit";
+
+export default defineConfig({
+  id: "app",
+  name: "App Icons",
+  icons: { home: "lucide:home", save: "lucide:content-save" },
+});
 ```
 
 ```ts
 // nuxt.config.ts
 export default defineNuxtConfig({
   modules: ["@icon-sheets/nuxt"],
-  iconSheets: {
-    icons: {
-      home: "lucide:home",
-      save: "lucide:content-save",
-    },
-  },
 });
 ```
 
@@ -34,14 +42,14 @@ export default defineNuxtConfig({
 </template>
 ```
 
-The module resolves the references at build time, inlines the sprite
+The module builds the config through the kit at build time, inlines the sprite
 server-side so icons paint on first load, and registers the `<Icon>` component
 and the `useIconSheets()` composable. Any of the
 [200k+ open-source icons](https://icon-sets.iconify.design) published as
 `@iconify-json/*` packages are a valid source: references resolve from locally
 installed packages first, then fall back to the public Iconify API. See
-[`@icon-sheets/nuxt`](./integrations/nuxt) for switchable sets, remote
-catalogs, and auth.
+[`@icon-sheets/nuxt`](./integrations/nuxt) for switchable sets, consuming a
+shared icons package, remote catalogs, and auth.
 
 ## Outside a framework
 
