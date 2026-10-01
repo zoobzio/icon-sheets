@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { parseArgs } from "node:util";
 
-import { build } from "./command";
+import { build } from "./build";
 
 const HELP = `Usage: icon-sheets build [options]
 

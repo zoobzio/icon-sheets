@@ -11,6 +11,9 @@ guard, the contract for the runtime service, Set documents, inline sheets and
 standalone `sprite.svg` files. The same output is imported by relative path in
 an app, or published by pointing a static `exports` map at it.
 
+`@icon-sheets/iconify` gains `resolveAll()`, which resolves a contract and its
+sets in one pass and acquires each collection once.
+
 **Breaking:** `@icon-sheets/iconify` no longer generates files. `generate()` and
 `generateSet()` are removed — use `@icon-sheets/kit`, or call
 `resolveContract()` / `resolveSet()` for the resolved objects. The option types

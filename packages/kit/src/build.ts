@@ -1,23 +1,14 @@
 import { resolve } from "node:path";
 
-import type { GenerateOptions, Output } from "./types";
+import type { BuildOptions, Output } from "./types";
 import { FILENAME } from "./constant";
 import { generate } from "./generate";
 import { loadConfig } from "./load";
 import { writeOutput } from "./write";
 
-/** Options for {@link build}. */
-export type BuildOptions = Omit<GenerateOptions, "cwd"> & {
-  /** The project root; defaults to `process.cwd()`. */
-  root?: string;
-
-  /** The config file, relative to `root`; defaults to `icon-sheets.config.ts`. */
-  config?: string;
-};
-
 /**
- * The whole build, end to end: load the config, resolve and emit, and write the
- * output directory. What the CLI runs.
+ * The whole build, end to end: load the config, generate, and write the output
+ * directory. What the CLI runs.
  *
  * @param options - The root, config path, and resolver hooks.
  */

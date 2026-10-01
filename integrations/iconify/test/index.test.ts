@@ -4,7 +4,7 @@ import type { IconifyIcon, IconifyJSON } from "@iconify/types";
 import { defineIconSheets } from "icon-sheets";
 import { defineCatalog } from "@icon-sheets/catalog";
 
-import { resolveContract, resolveSet } from "../src/resolve";
+import { resolveAll, resolveContract, resolveSet } from "../src/resolve";
 import { parseRef, plan } from "../src/refs";
 import type { Req } from "../src/types";
 
@@ -196,6 +196,59 @@ describe("resolveSet", () => {
         req,
       }),
     ).rejects.toThrow(/does not declare.*ghost/);
+  });
+});
+
+describe("resolveAll", () => {
+  const config = {
+    id: "app",
+    name: "App",
+    icons: { home: "mock:home", save: "mock:content-save" },
+  };
+  const sharp = {
+    id: "sharp",
+    name: "Sharp",
+    tags: ["dense"],
+    icons: { home: "mock:house" },
+  };
+
+  it("resolves the same documents as resolveContract and resolveSet", async () => {
+    const { req } = stub();
+    const resolved = await resolveAll({ config, sets: [sharp], req });
+
+    const { icons, ...identity } = sharp;
+    expect(resolved.contract).toEqual(await resolveContract({ config, req }));
+    expect(resolved.sets).toEqual([
+      await resolveSet({
+        identity,
+        aliases: Object.keys(config.icons),
+        icons,
+        req,
+      }),
+    ]);
+  });
+
+  it("acquires a prefix once across the contract and every set", async () => {
+    const { req, requested } = stub();
+    await resolveAll({
+      config,
+      sets: [sharp, { id: "flip", name: "Flip", icons: { save: "mock:home" } }],
+      req,
+    });
+    expect(requested).toHaveLength(1);
+    expect(requested[0]).toContain("icons=home,content-save,house");
+  });
+
+  it("rejects a set that rebinds an alias the config does not declare", async () => {
+    const { req, requested } = stub();
+    await expect(
+      resolveAll({
+        config,
+        sets: [{ id: "bad", name: "Bad", icons: { ghost: "mock:home" } }],
+        req,
+      }),
+    ).rejects.toThrow(/does not declare.*ghost/);
+    expect(requested).toHaveLength(0);
   });
 });
 

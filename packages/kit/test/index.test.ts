@@ -9,8 +9,14 @@ import type { Req } from "@icon-sheets/iconify";
 import { makeIconSheets } from "icon-sheets";
 import { useIconSheetsConfig } from "icon-sheets/config";
 
-import { build } from "../src/command";
+import { build } from "../src/build";
 import { defineConfig } from "../src/config";
+import { MANIFEST } from "../src/constant";
+import {
+  InvalidConfigError,
+  MalformedConfigError,
+  MissingConfigError,
+} from "../src/error";
 import { generate } from "../src/generate";
 import type { KitConfig, Output } from "../src/types";
 import { writeOutput } from "../src/write";
@@ -42,9 +48,14 @@ const config = defineConfig({
   name: "UI Icons",
   icons: { home: "mock:home", close: "mock:close" },
   sets: {
-    solid: { id: "solid", name: "Solid", icons: { home: "mock:home-solid" } },
+    solid: { name: "Solid", icons: { home: "mock:home-solid" } },
   },
 });
+
+/** A loader that fails the test if anything is fetched. */
+const offline: Req = async () => {
+  throw new Error("should not fetch");
+};
 
 const file = (built: Output, path: string): string => {
   const found = built.files.find((entry) => entry.path === path);
@@ -125,40 +136,88 @@ describe("generate", () => {
     expect(built.outDir).toBe("out");
   });
 
+  it("keys each emitted set by its config key", async () => {
+    const built = await generate(config, { req });
+    expect(file(built, "sets.mjs")).toContain('"id": "solid"');
+  });
+
+  it("acquires a collection once for the contract and every set", async () => {
+    const requested: string[] = [];
+    const counting: Req = (src) => {
+      requested.push(src.href);
+      return req(src);
+    };
+    const sets = {
+      solid: { name: "Solid", icons: { home: "mock:home-solid" } },
+      swapped: { name: "Swapped", icons: { close: "mock:home" } },
+    };
+    await generate({ ...config, sets }, { req: counting });
+    expect(requested).toHaveLength(1);
+  });
+
   it.each([
-    [{ icons: { "bad alias": "mock:home" } }, /invalid: bad alias/],
-    [{ prefix: 'x"' }, /prefix/],
+    [{ icons: { "bad alias": "mock:home" } }, /alias "bad alias" may only/],
+    [{ prefix: 'x"' }, /prefix "x\\"" may only/],
     [{ outDir: "../elsewhere" }, /outDir/],
     [{ outDir: "." }, /outDir/],
     [{ outDir: "/abs" }, /outDir/],
+    [{ outDir: "C:\\abs" }, /outDir/],
+    [{ sets: { "a/b": { name: "A", icons: {} } } }, /set "a\/b" may only/],
     [
-      {
-        sets: {
-          a: { id: "solid", name: "A", icons: {} },
-          b: { id: "solid", name: "B", icons: {} },
-        },
-      },
-      /declared more than once/,
+      { sets: { x: { name: "X", icons: { nope: "mock:home" } } } },
+      /set "x" rebinds "nope"/,
     ],
-    [{ sets: { a: { id: "a/b", name: "A", icons: {} } } }, /set id/],
-  ] satisfies [Partial<KitConfig>, RegExp][])(
+    [
+      { sets: { x: { name: 42, icons: {} } } },
+      /set "x": identity "name" must be a string/,
+    ],
+    [
+      { sets: { x: { id: "y", name: "X", icons: {} } } },
+      /set "x" declares an "id"/,
+    ],
+    [{ name: undefined }, /identity "name" must be a string/],
+  ] as [object, RegExp][])(
     "rejects a bad config before resolving (%o)",
     async (patch, message) => {
-      const fetching: Req = async () => {
-        throw new Error("should not fetch");
-      };
-      await expect(
-        generate({ ...config, ...patch }, { req: fetching }),
-      ).rejects.toThrow(message);
+      const bad = { ...config, ...patch } as KitConfig;
+      await expect(generate(bad, { req: offline })).rejects.toThrow(message);
     },
   );
 
-  it("rejects a set that rebinds an undeclared alias", async () => {
-    const loose: KitConfig = {
+  it("ignores a set entry left unset", async () => {
+    const sets = { solid: { name: "Solid", icons: { nope: undefined } } };
+    const loose = { ...config, sets } as KitConfig;
+    const built = await generate(loose, { req });
+    expect(file(built, "sets.mjs")).toContain('"icons": {}');
+  });
+
+  it("accepts an outDir that only looks like a parent", async () => {
+    const built = await generate({ ...config, outDir: "..icons" }, { req });
+    expect(built.outDir).toBe("..icons");
+  });
+
+  it("reports every issue of a bad config together", async () => {
+    const bad: KitConfig = {
       ...config,
-      sets: { x: { id: "x", name: "X", icons: { nope: "mock:home" } } },
+      icons: { "bad alias": "mock:home", "worse/alias": "mock:home" },
+      prefix: "a b",
+      outDir: "..",
+      sets: { x: { name: "X", icons: { nope: "mock:home" } } },
     };
-    await expect(generate(loose, { req })).rejects.toThrow(/nope/);
+    const error = await generate(bad, { req: offline }).catch(
+      (thrown: unknown) => thrown,
+    );
+    expect(error).toBeInstanceOf(InvalidConfigError);
+    expect((error as InvalidConfigError).issues).toEqual([
+      'alias "bad alias" may only contain letters, digits, "_", "-" and "."',
+      'alias "worse/alias" may only contain letters, digits, "_", "-" and "."',
+      'prefix "a b" may only contain letters, digits, "_", "-" and "."',
+      'set "x" rebinds "nope", an alias the config does not declare',
+      'outDir ".." must be a subdirectory of the project root',
+    ]);
+    expect((error as Error).message).toContain(
+      "the config is invalid —\n  alias",
+    );
   });
 });
 
@@ -206,16 +265,50 @@ describe("the emitted modules", () => {
     expect(sheet.sheets.solid).toContain('d="home-solid"');
   });
 
-  it("removes a dropped set's sprite but keeps unrelated files", async () => {
+  it("removes a dropped set's sprite but keeps files it did not write", async () => {
     const root = await temp();
     await writeOutput(await generate(config, { req }), root);
     await writeFile(join(root, "icons", "authored.ts"), "export {};\n");
+    await writeFile(join(root, "icons", "sprite.authored.svg"), "<svg/>\n");
     const bare = { ...config, sets: {} };
     await writeOutput(await generate(bare, { req }), root);
     const names = await readdir(join(root, "icons"));
     expect(names).not.toContain("sprite.solid.svg");
     expect(names).toContain("authored.ts");
+    expect(names).toContain("sprite.authored.svg");
     expect(names).toContain("sprite.svg");
+  });
+
+  it("records what it wrote in a manifest", async () => {
+    const root = await temp();
+    const built = await generate(config, { req });
+    await writeOutput(built, root);
+    const manifest = JSON.parse(
+      await readFile(join(root, "icons", MANIFEST), "utf8"),
+    );
+    expect(manifest.files).toEqual(built.files.map((entry) => entry.path));
+  });
+
+  it("never removes a file outside the output directory", async () => {
+    const root = await temp();
+    const built = await generate(config, { req });
+    await writeOutput(built, root);
+    await writeFile(join(root, "keep.txt"), "keep\n");
+    await writeFile(
+      join(root, "icons", MANIFEST),
+      JSON.stringify({ files: ["../keep.txt", join(root, "keep.txt"), 42] }),
+    );
+    await writeOutput(built, root);
+    expect(await readdir(root)).toContain("keep.txt");
+  });
+
+  it("removes nothing when the manifest is unreadable", async () => {
+    const root = await temp();
+    await writeOutput(await generate(config, { req }), root);
+    await writeFile(join(root, "icons", MANIFEST), "not json");
+    const bare = { ...config, sets: {} };
+    await writeOutput(await generate(bare, { req }), root);
+    expect(await readdir(join(root, "icons"))).toContain("sprite.solid.svg");
   });
 });
 
@@ -256,6 +349,41 @@ describe("build", () => {
       /must default-export a config/,
     );
   });
+
+  it("rejects a config whose icons are not a map", async () => {
+    const root = await scaffold();
+    await writeFile(join(root, "bad.ts"), "export default { icons: null };\n");
+    await expect(build({ root, req, config: "bad.ts" })).rejects.toBeInstanceOf(
+      MalformedConfigError,
+    );
+  });
+
+  it("rejects a config file that does not exist", async () => {
+    const root = await scaffold();
+    const error = await build({ root, req, config: "nope.ts" }).catch(
+      (thrown: unknown) => thrown,
+    );
+    expect(error).toBeInstanceOf(MissingConfigError);
+    expect((error as MissingConfigError).path).toBe(join(root, "nope.ts"));
+  });
+
+  it("lets an error thrown by the config file itself through", async () => {
+    const root = await scaffold();
+    await writeFile(join(root, "bad.ts"), 'throw new Error("boom");\n');
+    await expect(build({ root, req, config: "bad.ts" })).rejects.toThrow(
+      /boom/,
+    );
+  });
+
+  it("names the offending file on a MalformedConfigError", async () => {
+    const root = await scaffold();
+    await writeFile(join(root, "bad.ts"), "export default 42;\n");
+    const error = await build({ root, req, config: "bad.ts" }).catch(
+      (thrown: unknown) => thrown,
+    );
+    expect(error).toBeInstanceOf(MalformedConfigError);
+    expect((error as MalformedConfigError).path).toBe(join(root, "bad.ts"));
+  });
 });
 
 describe("defineConfig", () => {
@@ -265,7 +393,7 @@ describe("defineConfig", () => {
       name: "UI",
       icons: { home: "mock:home" },
       // @ts-expect-error — "nope" is not a declared alias
-      sets: { x: { id: "x", name: "X", icons: { nope: "mock:home" } } },
+      sets: { x: { name: "X", icons: { nope: "mock:home" } } },
     });
   });
 });

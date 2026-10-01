@@ -25,16 +25,27 @@ export default defineConfig({
   name: "Acme UI",
   icons: { home: "lucide:house", close: "lucide:x", search: "mdi:magnify" },
   sets: {
-    solid: { id: "solid", name: "Solid", icons: { home: "mdi:home" } },
+    solid: { name: "Solid", icons: { home: "mdi:home" } },
   },
   prefix: "acme-", // optional: symbol ids become "acme-home"
   outDir: "icons", // optional: the default
 });
 ```
 
-The alias union is inferred from `icons`, so a set rebinding an alias the
-config does not declare is a type error. Aliases, set ids and the prefix may
-only contain letters, digits, `_`, `-` and `.`.
+A set's key is its id: `solid` above is emitted as the Set document with
+`id: "solid"` and as `sprite.solid.svg`. The alias union is inferred from
+`icons`, so a set rebinding an alias the config does not declare is a type
+error. Aliases, set ids and the prefix may only contain letters, digits, `_`,
+`-` and `.`.
+
+The config is checked before anything is resolved, and every problem is
+reported together:
+
+```
+@icon-sheets/kit: the config is invalid —
+  alias "bad alias" may only contain letters, digits, "_", "-" and "."
+  set "solid" rebinds "nope", an alias the config does not declare
+```
 
 ## Build
 
@@ -43,9 +54,14 @@ icon-sheets build [--config <file>] [--root <dir>]
 ```
 
 Resolves every ref and writes the modules and sprites to `outDir`. That is
-all it does — it never touches `package.json`. The output directory is never
-cleared, so it can sit beside authored source: the kit overwrites its own files
-and removes only sprites of sets that no longer exist.
+all it does — it never touches `package.json`. Each collection is acquired
+once, however many sets draw from it.
+
+The output directory is never cleared, so it can sit beside authored source.
+Each build records the files it wrote in `.icon-sheets.json` there; the next
+build overwrites its own files and removes only the ones that manifest lists
+and it no longer produces — the sprite of a removed or renamed set. A file the
+kit did not write is never touched.
 
 In an app, import the modules by relative path (`./icons/config.mjs`).
 
@@ -99,11 +115,12 @@ document.body.insertAdjacentHTML("afterbegin", sheet);
 import { makeIconSheets } from "icon-sheets";
 import { useIconSheetsConfig } from "icon-sheets/config";
 import { defineSprite } from "icon-sheets/svg";
+import { prefix } from "@acme/icons";
 import config from "@acme/icons/config";
 import sets from "@acme/icons/sets";
 
 const icons = makeIconSheets(useIconSheetsConfig(config));
-const sprite = defineSprite(icons, { prefix: "acme-" });
+const sprite = defineSprite(icons, { prefix }); // the prefix the kit built with
 icons.apply(sets.solid);
 ```
 
@@ -112,3 +129,8 @@ icons.apply(sets.solid);
 `generate(config, { cwd, req, resolvers })` resolves and returns
 `{ outDir, files }` without writing anything; `writeOutput` writes them, and
 `build()` runs the whole CLI pipeline.
+
+A config that breaks the kit's rules throws `InvalidConfigError` before
+anything is resolved, carrying every problem as `issues`. `build()` throws
+`MissingConfigError` when there is no config file and `MalformedConfigError`
+when the file does not default-export a config; both carry the file's `path`.

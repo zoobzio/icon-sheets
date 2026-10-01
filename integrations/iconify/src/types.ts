@@ -1,4 +1,4 @@
-import type { IconifyIcon, Identity } from "@icon-sheets/schema";
+import type { Contract, IconifyIcon, Identity, Set } from "@icon-sheets/schema";
 
 /**
  * The authored ref config: the input to {@link resolveContract}. Identity plus an
@@ -40,8 +40,8 @@ export type SchemeResolver = (ref: ParsedRef) => Promise<IconifyIcon | null>;
 export type Req = (src: URL) => Promise<string>;
 
 /**
- * The I/O and resolver hooks shared by {@link resolveContract} and
- * {@link resolveSet}. `req` intercepts every network fetch; nothing is ever
+ * The I/O and resolver hooks shared by {@link resolveContract},
+ * {@link resolveSet} and {@link resolveAll}. `req` intercepts every network fetch; nothing is ever
  * written to disk here.
  */
 export type SharedOptions = {
@@ -82,6 +82,35 @@ export type ResolveSetOptions = SharedOptions & {
 
   /** Each alias the set rebinds mapped to its icon ref string. */
   icons: Record<string, string>;
+};
+
+/**
+ * A switchable set authored as refs: identity plus a ref map rebinding a subset
+ * of a {@link RefConfig}'s aliases. The input form of a {@link Set} document.
+ */
+export type RefSet = Identity & {
+  /** Each alias the set rebinds mapped to its icon ref string. */
+  icons: Record<string, string>;
+};
+
+/**
+ * Options for {@link resolveAll}: the authored ref config and the sets layered
+ * over it, plus the shared I/O hooks.
+ */
+export type ResolveAllOptions = SharedOptions & {
+  config: RefConfig;
+
+  /** The sets to resolve — every ref key must name one of the config's aliases. */
+  sets: RefSet[];
+};
+
+/**
+ * What {@link resolveAll} returns: the resolved contract, and the resolved Set
+ * documents in the order their refs were given.
+ */
+export type Resolved = {
+  contract: Contract;
+  sets: Set[];
 };
 
 /**

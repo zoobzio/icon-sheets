@@ -1,13 +1,14 @@
 import { SchemaError, defineSchema } from "@icon-sheets/schema";
-import type { Contract, Set } from "@icon-sheets/schema";
-import type { IconifyJSON } from "@iconify/types";
+import type { Contract, Identity, Set } from "@icon-sheets/schema";
 
 import type {
   RefEntry,
-  Req,
+  ResolveAllOptions,
   ResolveOptions,
   ResolveSetOptions,
+  Resolved,
   SchemeResolver,
+  SharedOptions,
 } from "./types";
 import { assemble } from "./assemble";
 import { plan } from "./refs";
@@ -44,17 +45,51 @@ export const reframe = <T>(entries: RefEntry[], run: () => T): T => {
   }
 };
 
-// Builds the scheme-resolver map for a run: the built-in iconify (over the
-// acquired collections) and url resolvers, with any caller override merged on.
-const resolversFor = (
-  collections: Map<string, IconifyJSON>,
-  req: Req,
-  overrides: Record<string, SchemeResolver> | undefined,
-): Record<string, SchemeResolver> => ({
-  iconify: iconifyResolver(collections),
-  url: urlResolver(req),
-  ...overrides,
-});
+// Acquires every collection the entries draw from — one batched request per
+// prefix, however many documents the entries span — and builds the run's
+// scheme-resolver map: the built-in iconify (over those collections) and url
+// resolvers, with any caller override merged on.
+const prepare = async (
+  entries: RefEntry[],
+  options: SharedOptions,
+): Promise<Record<string, SchemeResolver>> => {
+  const cwd = options.cwd ?? process.cwd();
+  const req = options.req ?? request;
+  const collections = await acquire(
+    entries.map((entry) => entry.parsed),
+    { cwd, req },
+  );
+  return {
+    iconify: iconifyResolver(collections),
+    url: urlResolver(req),
+    ...options.resolvers,
+  };
+};
+
+// A set may only rebind aliases the contract declares.
+const membership = (aliases: string[], icons: Record<string, string>): void => {
+  const known = new Set(aliases);
+  const unknown = Object.keys(icons).filter((alias) => !known.has(alias));
+  if (unknown.length > 0) {
+    throw new Error(
+      `@icon-sheets/iconify: the set rebinds aliases the contract does not declare: ${unknown.join(", ")}`,
+    );
+  }
+};
+
+// Resolves one document's planned refs and validates the result. A set carrying
+// icons is contract-shaped, so the contract kind validates either document's
+// identity and every resolved icon in one pass.
+const assembleDocument = async (
+  identity: Identity,
+  entries: RefEntry[],
+  resolvers: Record<string, SchemeResolver>,
+): Promise<Contract> => {
+  const icons = await assemble(entries, resolvers);
+  const document: Contract = { ...identity, icons };
+  reframe(entries, () => defineSchema(document));
+  return document;
+};
 
 /**
  * Resolves a ref config into a validated {@link Contract}: parses the refs,
@@ -68,21 +103,10 @@ const resolversFor = (
 export const resolveContract = async (
   options: ResolveOptions,
 ): Promise<Contract> => {
-  const cwd = options.cwd ?? process.cwd();
-  const req = options.req ?? request;
-
-  const { icons: refs, ...identity } = options.config;
-  const entries = plan(refs);
-  const collections = await acquire(
-    entries.map((entry) => entry.parsed),
-    { cwd, req },
-  );
-  const resolvers = resolversFor(collections, req, options.resolvers);
-
-  const icons = await assemble(entries, resolvers);
-  const contract: Contract = { ...identity, icons };
-  reframe(entries, () => defineSchema(contract));
-  return contract;
+  const { icons, ...identity } = options.config;
+  const entries = plan(icons);
+  const resolvers = await prepare(entries, options);
+  return assembleDocument(identity, entries, resolvers);
 };
 
 /**
@@ -95,30 +119,41 @@ export const resolveContract = async (
  * @param options - The set identity, the contract aliases, the ref map, and hooks.
  */
 export const resolveSet = async (options: ResolveSetOptions): Promise<Set> => {
-  const cwd = options.cwd ?? process.cwd();
-  const req = options.req ?? request;
-
-  const known = new Set(options.aliases);
-  const unknown = Object.keys(options.icons).filter(
-    (alias) => !known.has(alias),
-  );
-  if (unknown.length > 0) {
-    throw new Error(
-      `@icon-sheets/iconify: the set rebinds aliases the contract does not declare: ${unknown.join(", ")}`,
-    );
-  }
-
+  membership(options.aliases, options.icons);
   const entries = plan(options.icons);
-  const collections = await acquire(
-    entries.map((entry) => entry.parsed),
-    { cwd, req },
-  );
-  const resolvers = resolversFor(collections, req, options.resolvers);
+  const resolvers = await prepare(entries, options);
+  return assembleDocument(options.identity, entries, resolvers);
+};
 
-  const icons = await assemble(entries, resolvers);
-  const set: Set = { ...options.identity, icons };
-  // A set carrying icons is contract-shaped, so the contract kind validates its
-  // identity and every resolved icon in one pass.
-  reframe(entries, () => defineSchema({ ...options.identity, icons }));
-  return set;
+/**
+ * Resolves a ref config and its sets in one pass — the same documents
+ * {@link resolveContract} and {@link resolveSet} return, but with every ref
+ * planned up front and the collections acquired once, so a prefix the contract
+ * and several sets draw from costs one request rather than one per document.
+ * Each set is membership-checked against the config's aliases.
+ *
+ * @param options - The ref config, the ref sets, and the I/O and resolver hooks.
+ */
+export const resolveAll = async (
+  options: ResolveAllOptions,
+): Promise<Resolved> => {
+  const { icons, ...identity } = options.config;
+  const aliases = Object.keys(icons);
+  const base = plan(icons);
+  const layers = options.sets.map(({ icons, ...identity }) => {
+    membership(aliases, icons);
+    return { identity, entries: plan(icons) };
+  });
+
+  const resolvers = await prepare(
+    [...base, ...layers.flatMap((layer) => layer.entries)],
+    options,
+  );
+
+  const contract = await assembleDocument(identity, base, resolvers);
+  const sets: Set[] = [];
+  for (const layer of layers) {
+    sets.push(await assembleDocument(layer.identity, layer.entries, resolvers));
+  }
+  return { contract, sets };
 };

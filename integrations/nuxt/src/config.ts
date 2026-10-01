@@ -8,11 +8,12 @@ import type { Identity } from "icon-sheets";
 export type RefIcons = Record<string, string>;
 
 /**
- * A switchable set authored as refs: identity plus a partial ref map rebinding a
- * subset of the contract's aliases. The module resolves and serves these over
- * the catalog wire protocol.
+ * A switchable set authored as refs: a name, optional discovery metadata, and a
+ * partial ref map rebinding a subset of the contract's aliases. Its id is the
+ * key it is declared under in {@link NuxtIconSheetsConfig.sets}. The module
+ * resolves and serves these over the catalog wire protocol.
  */
-export type RefSet = Identity & { icons: RefIcons };
+export type RefSet = Omit<Identity, "id"> & { icons: RefIcons };
 
 /**
  * The module's configuration. Icons are authored as refs; the module resolves
@@ -31,9 +32,9 @@ export interface NuxtIconSheetsConfig {
 
   /**
    * The set catalog: switchable layers the app's server serves over the catalog
-   * wire protocol. Keys are authoring convenience only — each set's own `id` is
-   * the identity it is listed and retrieved under. Payloads are never bundled
-   * with the app: the module loads them into nitro's server assets.
+   * wire protocol, keyed by set id — the identity each set is listed and
+   * retrieved under. Payloads are never bundled with the app: the module loads
+   * them into nitro's server assets.
    */
   sets?: Record<string, RefSet>;
 

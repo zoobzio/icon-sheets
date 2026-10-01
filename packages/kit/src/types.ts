@@ -1,12 +1,13 @@
-import type { Identity } from "@icon-sheets/schema";
+import type { Contract, Identity, Set } from "@icon-sheets/schema";
 import type { Req, SchemeResolver } from "@icon-sheets/iconify";
 
 /**
- * A switchable set authored as refs: identity plus a partial ref map rebinding a
- * subset of the config's aliases. Emitted as a Set document for `apply`, and as
- * its own sprite (the base sheet with the set's rebinds on top).
+ * A switchable set authored as refs: a name, optional discovery metadata, and a
+ * partial ref map rebinding a subset of the config's aliases. Its id is the key
+ * it is declared under in {@link KitConfig.sets}. Emitted as a Set document for
+ * `apply`, and as its own sprite (the base sheet with the set's rebinds on top).
  */
-export type KitSet<A extends string = string> = Identity & {
+export type KitSet<A extends string = string> = Omit<Identity, "id"> & {
   icons: Partial<Record<A, string>>;
 };
 
@@ -20,9 +21,10 @@ export type KitConfig<A extends string = string> = Identity & {
   icons: Record<A, string>;
 
   /**
-   * Switchable sets. Keys are authoring convenience only — each set is emitted
-   * under its own `id`. Not an inference site for the alias union, so a set
-   * that rebinds an undeclared alias is a type error rather than a widening.
+   * Switchable sets, keyed by set id — the id each Set document carries, and
+   * the name of its sprite file. Not an inference site for the alias union, so
+   * a set that rebinds an undeclared alias is a type error rather than a
+   * widening.
    */
   sets?: Record<string, KitSet<NoInfer<A>>>;
 
@@ -49,6 +51,31 @@ export type GenerateOptions = {
 
   /** Scheme resolvers merged over the built-in `iconify` / `url` ones. */
   resolvers?: Record<string, SchemeResolver>;
+};
+
+/** Options for {@link build}: the resolver hooks plus where the project lives. */
+export type BuildOptions = Omit<GenerateOptions, "cwd"> & {
+  /** The project root; defaults to `process.cwd()`. */
+  root?: string;
+
+  /** The config file, relative to `root`; defaults to `icon-sheets.config.ts`. */
+  config?: string;
+};
+
+/**
+ * A config resolved: every ref turned into its icon literal. The one value the
+ * emitters read — each takes a kit and returns the files it is responsible for,
+ * so nothing downstream of resolution sees a ref or touches the network.
+ */
+export type Kit = {
+  /** The resolved base contract: the config's identity plus every alias's icon. */
+  contract: Contract;
+
+  /** The resolved Set documents, in authored order. */
+  sets: Set[];
+
+  /** The symbol id prefix; empty when the config sets none. */
+  prefix: string;
 };
 
 /** One emitted file, its path relative to the output directory. */
