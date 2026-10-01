@@ -5,7 +5,8 @@ semantic icon contract sourced from Iconify collections, rendered as an inline
 SVG sprite, with a switcher that applies alternate icon sets at runtime.
 
 - **Base contract** — eight aliases (`home`, `search`, …) drawn from Lucide,
-  authored as refs in `nuxt.config.ts` and resolved at build time.
+  authored as refs in `icon-sheets.config.ts`, which the module builds through
+  `@icon-sheets/kit`.
 - **Sets** — Material, Tabler, and Phosphor rebind the same aliases; each is
   served over the catalog and applied on demand.
 - **Table** — the alias, its constant `#alias` reference, and the currently
@@ -16,4 +17,5 @@ SVG sprite, with a switcher that applies alternate icon sets at runtime.
 pnpm --filter @icon-sheets/example-nuxt dev
 ```
 
-Then open the printed URL and use the switcher.
+Then open the printed URL and use the switcher. Editing
+`icon-sheets.config.ts` restarts dev with the new icons.

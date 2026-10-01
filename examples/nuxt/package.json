@@ -15,6 +15,7 @@
     "vue": "^3.5.35"
   },
   "devDependencies": {
+    "@icon-sheets/kit": "workspace:*",
     "@iconify-json/lucide": "^1",
     "@iconify-json/mdi": "^1",
     "@iconify-json/ph": "^1",

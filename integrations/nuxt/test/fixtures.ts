@@ -16,14 +16,20 @@ export const contract = {
 };
 
 /**
- * The ref sets an app authors under `iconSheets.sets`, keyed by set id.
- * `round` carries discovery tags; `sharp` does not.
+ * The resolved sets an app passes under `iconSheets.sets`, keyed by set id — the
+ * shape `@icon-sheets/kit` emits. `round` carries discovery tags; `sharp` does
+ * not.
  */
 export const sets = {
-  sharp: { name: "Sharp", icons: { home: "lucide:home" } },
+  sharp: {
+    id: "sharp",
+    name: "Sharp",
+    icons: { home: icon('<path d="M12 3 2 12h20z"/>') },
+  },
   round: {
+    id: "round",
     name: "Round",
     tags: ["soft"],
-    icons: { home: "lucide:home-round" },
+    icons: { home: icon('<circle cx="12" cy="12" r="9"/>') },
   },
 };

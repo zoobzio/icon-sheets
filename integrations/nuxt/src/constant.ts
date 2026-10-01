@@ -38,8 +38,8 @@ export const SPRITE = "sprite.html";
 
 /**
  * The single env var carrying the remote catalog's bearer token. Read from
- * `process.env` at build (to auth ref resolution against a private source) and,
- * as the override for `runtimeConfig.iconSheets.token`, at runtime (to auth set
- * loading) — so one variable serves both phases.
+ * `process.env` at build (to auth a local config's ref resolution against a
+ * private source) and, as the override for `runtimeConfig.iconSheets.token`, at
+ * runtime (to auth set loading) — so one variable serves both phases.
  */
 export const TOKEN_ENV = "NUXT_ICON_SHEETS_TOKEN";

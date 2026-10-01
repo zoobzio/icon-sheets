@@ -1,6 +1,7 @@
 import { defineNuxtPlugin } from "#app";
 import { watchEffect } from "vue";
 import { defineSprite } from "icon-sheets/svg";
+import { prefix } from "#build/icon-sheets.mjs";
 import { makeIconSheets } from "./client";
 import { CONTAINER } from "../constant";
 
@@ -12,14 +13,15 @@ import { CONTAINER } from "../constant";
  * nitro plugin), so icons paint on first load. On the client the sprite is kept
  * in sync with the reactive service: `sheet()` reads the active contract inside a
  * `watchEffect`, so applying a set or writing an override re-renders the sprite
- * container in place. Because every `<symbol>` id is the bare alias, the
- * `<use href="#alias">` in each `<Icon>` never changes — only the symbol body does.
+ * container in place. Because every `<symbol>` id is the alias under the
+ * configured prefix, the `<use href>` in each `<Icon>` never changes — only the
+ * symbol body does.
  */
 export default defineNuxtPlugin({
   name: "icon-sheets",
   setup: async (nuxtApp) => {
     const iconSheets = makeIconSheets();
-    const sprite = defineSprite(iconSheets);
+    const sprite = defineSprite(iconSheets, { prefix });
 
     if (import.meta.client) {
       let container = document.getElementById(CONTAINER);

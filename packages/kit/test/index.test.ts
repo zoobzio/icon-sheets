@@ -18,6 +18,7 @@ import {
   MissingConfigError,
 } from "../src/error";
 import { generate } from "../src/generate";
+import { resolveKit } from "../src/resolve";
 import type { KitConfig, Output } from "../src/types";
 import { writeOutput } from "../src/write";
 
@@ -218,6 +219,39 @@ describe("generate", () => {
     expect((error as Error).message).toContain(
       "the config is invalid —\n  alias",
     );
+  });
+});
+
+describe("resolveKit", () => {
+  it("resolves a config into its documents without emitting files", async () => {
+    const kit = await resolveKit({ ...config, prefix: "ui-" }, { req });
+    expect(kit.contract.id).toBe("ui");
+    expect(kit.contract.icons.home.body).toBe('<path d="home"/>');
+    expect(kit.sets).toEqual([
+      {
+        id: "solid",
+        name: "Solid",
+        icons: {
+          home: expect.objectContaining({ body: '<path d="home-solid"/>' }),
+        },
+      },
+    ]);
+    expect(kit.prefix).toBe("ui-");
+    expect(kit.outDir).toBe("icons");
+  });
+
+  it("settles the optional fields", async () => {
+    const bare = { id: "x", name: "X", icons: { home: "mock:home" } };
+    const kit = await resolveKit(bare, { req });
+    expect(kit.sets).toEqual([]);
+    expect(kit.prefix).toBe("");
+    expect(kit.contract).not.toHaveProperty("outDir");
+  });
+
+  it("rejects a bad config before resolving", async () => {
+    await expect(
+      resolveKit({ ...config, prefix: "a b" }, { req: offline }),
+    ).rejects.toBeInstanceOf(InvalidConfigError);
   });
 });
 

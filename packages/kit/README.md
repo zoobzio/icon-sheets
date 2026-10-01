@@ -124,11 +124,22 @@ const sprite = defineSprite(icons, { prefix }); // the prefix the kit built with
 icons.apply(sets.solid);
 ```
 
+## With Nuxt
+
+[`@icon-sheets/nuxt`](../../integrations/nuxt) takes a kit config two ways. In
+an app, it finds `icon-sheets.config.ts` and builds it itself — no
+`icon-sheets build` step. For a shared icons package, import the generated
+`config`, `sets` and root modules in `nuxt.config` and pass them as
+`iconSheets`.
+
 ## Programmatic
 
 `generate(config, { cwd, req, resolvers })` resolves and returns
 `{ outDir, files }` without writing anything; `writeOutput` writes them, and
-`build()` runs the whole CLI pipeline.
+`build()` runs the whole CLI pipeline. `resolveKit(config, options)` stops one
+step earlier and returns the resolved documents themselves —
+`{ contract, sets, prefix, outDir }` — for a consumer that wants them in memory
+rather than as files.
 
 A config that breaks the kit's rules throws `InvalidConfigError` before
 anything is resolved, carrying every problem as `issues`. `build()` throws

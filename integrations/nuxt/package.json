@@ -1,7 +1,7 @@
 {
   "name": "@icon-sheets/nuxt",
   "version": "0.0.5",
-  "description": "Nuxt module for icon-sheets — build-time icon resolution, SSR sprite inlining, typed Icon component, runtime set switching",
+  "description": "Nuxt module for icon-sheets — builds or consumes an @icon-sheets/kit config: SSR sprite inlining, typed Icon component, runtime set switching",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -36,7 +36,7 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@icon-sheets/iconify": "workspace:*",
+    "@icon-sheets/kit": "workspace:*",
     "@nuxt/kit": "^4.4.6",
     "h3": "^1.15.11",
     "icon-sheets": "workspace:*",

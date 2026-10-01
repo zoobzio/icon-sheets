@@ -63,6 +63,9 @@ importers:
         specifier: ^3.5.35
         version: 3.5.39(typescript@6.0.3)
     devDependencies:
+      '@icon-sheets/kit':
+        specifier: workspace:*
+        version: link:../../packages/kit
       '@iconify-json/lucide':
         specifier: ^1
         version: 1.2.118
@@ -103,9 +106,9 @@ importers:
 
   integrations/nuxt:
     dependencies:
-      '@icon-sheets/iconify':
+      '@icon-sheets/kit':
         specifier: workspace:*
-        version: link:../iconify
+        version: link:../../packages/kit
       '@nuxt/kit':
         specifier: ^4.4.6
         version: 4.4.8(magicast@0.5.3)

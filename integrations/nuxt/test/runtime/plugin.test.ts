@@ -6,6 +6,7 @@ vi.mock("#build/icon-sheets.mjs", () => ({
   get contract() {
     return structuredClone(contract);
   },
+  prefix: "",
 }));
 
 vi.mock("#app", () => ({
