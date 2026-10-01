@@ -1,5 +1,35 @@
 # @icon-sheets/kit
 
+## 0.0.6
+
+### Patch Changes
+
+- [#2](https://github.com/zoobzio/icon-sheets/pull/2) [`5769532`](https://github.com/zoobzio/icon-sheets/commit/5769532127b3de5bb2814f1673ca41b687209a94) Thanks [@zoobzio](https://github.com/zoobzio)! - **Breaking:** the Nuxt module's icons are now an `@icon-sheets/kit` config,
+  taken one of two ways.
+
+  - **A local config.** Move the refs out of `nuxt.config` into an
+    `icon-sheets.config.ts` in the project root (`defineConfig` from
+    `@icon-sheets/kit`). The module finds it, builds it through the kit in
+    memory, and rebuilds it when it changes in dev. `iconSheets.config` names
+    another path.
+  - **An icons package.** Pass the output of a kit build —
+    `iconSheets: { ...config, sets, prefix }`, imported from the package's
+    `config`, `sets` and root modules.
+
+  `iconSheets.icons`, `id` and `name` are gone. The new `prefix` namespaces the
+  sprite's symbol ids and each `<Icon>`'s `href`; a local config brings its own.
+  The module depends on `@icon-sheets/kit` instead of `@icon-sheets/iconify`.
+
+  `@icon-sheets/kit` exports `resolveKit()`, which checks and resolves a config
+  into its documents — `{ contract, sets, prefix, outDir }` — without emitting
+  files.
+
+- Updated dependencies []:
+  - @icon-sheets/schema@0.0.6
+  - @icon-sheets/utils@0.0.6
+  - @icon-sheets/svg@0.0.6
+  - @icon-sheets/iconify@0.0.6
+
 ## 0.0.5
 
 ### Patch Changes
