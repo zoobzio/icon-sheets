@@ -1,12 +1,12 @@
 {
-  "name": "@icon-sheets/iconify",
-  "version": "0.0.4",
-  "description": "Iconify ref resolution for icon-sheets \u2014 resolves Iconify references into validated contracts and sets",
+  "name": "@icon-sheets/kit",
+  "version": "0.0.3",
+  "description": "Preset builder for icon-sheets \u2014 turns one ref config into a publishable package of aliases, guard, contract, sets and sprites",
   "license": "MIT",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/zoobzio/icon-sheets.git",
-    "directory": "integrations/iconify"
+    "directory": "packages/kit"
   },
   "type": "module",
   "main": "./.dist/index.mjs",
@@ -16,6 +16,9 @@
       "types": "./.dist/index.d.ts",
       "import": "./.dist/index.mjs"
     }
+  },
+  "bin": {
+    "icon-sheets": "./.dist/cli.mjs"
   },
   "files": [
     ".dist"
@@ -28,13 +31,14 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@icon-sheets/iconify": "workspace:*",
     "@icon-sheets/schema": "workspace:*",
-    "@iconify/types": "^2.0.0",
-    "@iconify/utils": "^3.1.4",
-    "objectively": "^0.1.1"
+    "@icon-sheets/svg": "workspace:*",
+    "@icon-sheets/utils": "workspace:*",
+    "jiti": "^2.7.0"
   },
   "devDependencies": {
-    "@icon-sheets/catalog": "workspace:*",
+    "@iconify/types": "^2.0.0",
     "@types/node": "^25.9.1",
     "icon-sheets": "workspace:*"
   }

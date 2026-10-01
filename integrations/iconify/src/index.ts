@@ -1,10 +1,9 @@
-export { generate, generateSet, resolveContract, resolveSet } from "./generate";
+export { resolveContract, resolveSet } from "./resolve";
 export type {
-  GenerateOptions,
-  GenerateResult,
-  GenerateSetOptions,
   ParsedRef,
   RefConfig,
   Req,
+  ResolveOptions,
+  ResolveSetOptions,
   SchemeResolver,
 } from "./types";

@@ -43,8 +43,8 @@ export const parseRef = (alias: string, raw: string): ParsedRef => {
 /**
  * Parses an `icons` ref map into the list of {@link RefEntry} work items,
  * parsing every ref up front so a bad ref fails before any acquisition. Shared
- * by {@link generate} (the contract's icons) and {@link generateSet} (the set's
- * icons).
+ * by {@link resolveContract} (the contract's icons) and {@link resolveSet} (the
+ * set's icons).
  */
 export const plan = (icons: Record<string, string>): RefEntry[] => {
   return Object.entries(icons).map(([alias, raw]) => ({

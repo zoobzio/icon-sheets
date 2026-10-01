@@ -1,12 +1,10 @@
-import { mkdir, writeFile } from "node:fs/promises";
-import { pathToFileURL } from "node:url";
 import { describe, expect, it } from "vitest";
 
 import type { IconifyIcon, IconifyJSON } from "@iconify/types";
 import { defineIconSheets } from "icon-sheets";
 import { defineCatalog } from "@icon-sheets/catalog";
 
-import { generate, generateSet } from "../src/generate";
+import { resolveContract, resolveSet } from "../src/resolve";
 import { parseRef, plan } from "../src/refs";
 import type { Req } from "../src/types";
 
@@ -78,10 +76,10 @@ describe("parseRef / plan", () => {
   });
 });
 
-describe("generate", () => {
-  it("resolves refs into a contract literal carrying the authored identity", async () => {
+describe("resolveContract", () => {
+  it("resolves refs into a contract carrying the authored identity", async () => {
     const { req } = stub();
-    const result = await generate({
+    const contract = await resolveContract({
       config: {
         id: "app",
         name: "App Icons",
@@ -90,21 +88,17 @@ describe("generate", () => {
       },
       req,
     });
-    expect(result.filename).toBe("icon-sheets.config.ts");
-    expect(result.contents).toContain(
-      `import { defineIconSheetsConfig } from "icon-sheets/config";`,
-    );
-    expect(result.contents).toContain("contract: {");
-    expect(result.contents).toContain(`id: "app"`);
-    expect(result.contents).toContain(`name: "App Icons"`);
-    expect(result.contents).toContain(`body: "<path d=\\"M0 0\\"/>"`);
+    expect(contract.id).toBe("app");
+    expect(contract.name).toBe("App Icons");
+    expect(contract.tags).toEqual(["ui"]);
+    expect(contract.icons.home.body).toBe('<path d="M0 0"/>');
     // The collection-root width/height are baked into each resolved icon.
-    expect(result.contents).toContain("width: 24");
+    expect(contract.icons.home.width).toBe(24);
   });
 
   it("batches acquisition into one request per prefix", async () => {
     const { req, requested } = stub();
-    await generate({
+    await resolveContract({
       config: {
         id: "app",
         name: "App",
@@ -118,17 +112,17 @@ describe("generate", () => {
 
   it("flattens an Iconify alias chain through getIconData", async () => {
     const { req } = stub();
-    const result = await generate({
+    const contract = await resolveContract({
       config: { id: "a", name: "A", icons: { flipped: "mock:home-alias" } },
       req,
     });
-    expect(result.contents).toContain("<house/>");
-    expect(result.contents).toContain("hFlip: true");
+    expect(contract.icons.flipped.body).toBe("<house/>");
+    expect(contract.icons.flipped.hFlip).toBe(true);
   });
 
   it("resolves a $/ ref, and throws a ref-attributed error on a bad response", async () => {
     const { req } = stub();
-    const ok = await generate({
+    const ok = await resolveContract({
       config: {
         id: "a",
         name: "A",
@@ -136,10 +130,10 @@ describe("generate", () => {
       },
       req,
     });
-    expect(ok.contents).toContain("<url-icon/>");
+    expect(ok.icons.star.body).toBe("<url-icon/>");
 
     await expect(
-      generate({
+      resolveContract({
         config: {
           id: "a",
           name: "A",
@@ -153,7 +147,7 @@ describe("generate", () => {
   it("collects every unresolvable ref into one error", async () => {
     const { req } = stub();
     await expect(
-      generate({
+      resolveContract({
         config: {
           id: "a",
           name: "A",
@@ -165,7 +159,7 @@ describe("generate", () => {
   });
 
   it("lets a caller-supplied resolver override a scheme", async () => {
-    const result = await generate({
+    const contract = await resolveContract({
       config: {
         id: "a",
         name: "A",
@@ -173,31 +167,29 @@ describe("generate", () => {
       },
       resolvers: { url: async () => ({ body: "<custom-url/>" }) },
     });
-    expect(result.contents).toContain("<custom-url/>");
+    expect(contract.icons.star.body).toBe("<custom-url/>");
   });
 });
 
-describe("generateSet", () => {
-  it("emits a Set document as JSON under the given identity", async () => {
+describe("resolveSet", () => {
+  it("resolves a Set document under the given identity", async () => {
     const { req } = stub();
-    const result = await generateSet({
+    const set = await resolveSet({
       identity: { id: "sharp", name: "Sharp", tags: ["dense"] },
       aliases: ["home", "save"],
       icons: { home: "mock:content-save" },
       req,
     });
-    expect(result.filename).toBe("sharp.set.json");
-    const set = JSON.parse(result.contents);
     expect(set.id).toBe("sharp");
     expect(set.tags).toEqual(["dense"]);
-    expect(set.icons.home.body).toBe("<rect/>");
-    expect(set.icons.save).toBeUndefined();
+    expect(set.icons?.home?.body).toBe("<rect/>");
+    expect(set.icons?.save).toBeUndefined();
   });
 
   it("rejects a ref key that is not one of the contract's aliases", async () => {
     const { req } = stub();
     await expect(
-      generateSet({
+      resolveSet({
         identity: { id: "bad", name: "Bad" },
         aliases: ["home"],
         icons: { ghost: "mock:home" },
@@ -208,9 +200,9 @@ describe("generateSet", () => {
 });
 
 describe("round trip", () => {
-  it("generate → generateSet → serve through a catalog → apply → resolve", async () => {
+  it("resolveContract → resolveSet → serve through a catalog → apply → resolve", async () => {
     const { req } = stub();
-    const built = await generate({
+    const contract = await resolveContract({
       config: {
         id: "app",
         name: "App",
@@ -219,26 +211,17 @@ describe("round trip", () => {
       req,
     });
 
-    // Evaluate the emitted config module.
-    const out = new URL("./.generated/", import.meta.url);
-    await mkdir(out, { recursive: true });
-    await writeFile(new URL("./.gitignore", out), "*\n");
-    const file = new URL("./icon-sheets.config.mjs", out);
-    await writeFile(file, built.contents);
-    const imported = await import(pathToFileURL(file.pathname).href);
-    const contract = imported.default.contract;
-
     const icons = defineIconSheets(contract);
     expect(icons.aliases().sort()).toEqual(["home", "save"]);
 
-    // Generate a set, serve its JSON through an in-memory catalog provider.
-    const setFile = await generateSet({
+    // Resolve a set, serve it as JSON through an in-memory catalog provider.
+    const set = await resolveSet({
       identity: { id: "sharp", name: "Sharp" },
       aliases: icons.aliases(),
       icons: { home: "mock:content-save" },
       req,
     });
-    const stored: unknown = JSON.parse(setFile.contents);
+    const stored: unknown = JSON.parse(JSON.stringify(set));
     const catalog = defineCatalog(icons.schema, {
       list: () => ({ entries: [], total: 0, limit: 20, offset: 0 }),
       get: (id) => (id === "sharp" ? stored : undefined),

@@ -47,35 +47,45 @@ catalogs, and auth.
 
 ```sh
 pnpm add icon-sheets
-pnpm add -D @icon-sheets/iconify
+pnpm add -D @icon-sheets/kit
 ```
 
-The build layer turns an authored **ref config** — an identity plus the icons
-an app uses, named by Iconify reference — into a contract file of resolved
-icon data:
+Author an `icon-sheets.config.ts` — an identity plus the icons an app uses,
+named by Iconify reference — and let the kit generate the modules into `icons/`:
 
 ```ts
-import { writeFile } from "node:fs/promises";
-import { generate } from "@icon-sheets/iconify";
+// icon-sheets.config.ts
+import { defineConfig } from "@icon-sheets/kit";
 
-const result = await generate({
-  config: {
-    id: "app",
-    name: "App Icons",
-    icons: { home: "lucide:home", save: "lucide:content-save" },
-  },
+export default defineConfig({
+  id: "app",
+  name: "App Icons",
+  icons: { home: "lucide:home", save: "lucide:content-save" },
 });
-await writeFile(result.filename, result.contents); // icon-sheets.config.ts
 ```
 
-The runtime seeds a service from that file and resolves names with a plain
-lookup:
+```sh
+icon-sheets build
+```
+
+Use the sheet directly — a typed alias union, a guard, and the sprite:
+
+```ts
+import sheet from "./icons/sheet.mjs";
+import { href, isAlias } from "./icons/index.mjs";
+
+document.body.insertAdjacentHTML("afterbegin", sheet);
+`<svg><use href="${href("home")}"/></svg>`;
+isAlias(input); // narrows any string to the Alias union
+```
+
+Or seed the runtime service from the resolved contract and swap sets live:
 
 ```ts
 import { makeIconSheets } from "icon-sheets";
 import { useIconSheetsConfig } from "icon-sheets/config";
 import { defineSprite } from "icon-sheets/svg";
-import config from "./icon-sheets.config";
+import config from "./icons/config.mjs";
 
 const icons = makeIconSheets(useIconSheetsConfig(config));
 icons.resolve("home"); // { body, width, height }
@@ -85,14 +95,18 @@ sprite.sheet(); // the full <svg> sprite, for build-time or SSR
 sprite.href("home"); // "#home" — constant, whatever set is active
 ```
 
+The same output publishes as an icon package by pointing `exports` at it — see
+[`@icon-sheets/kit`](./packages/kit).
+
 ## How it works
 
 icon-sheets separates the **source** — Iconify JSON collections, with their
 alias chains and inherited transforms — from the **contract** the runtime
 carries. The build layer ([`@icon-sheets/iconify`](./integrations/iconify))
 resolves each authored reference through the Iconify spec once — flattening
-alias chains, merging transforms, baking in collection defaults — and emits a
-flat `alias → icon definition` map. The runtime never holds a collection and
+alias chains, merging transforms, baking in collection defaults — into a flat
+`alias → icon definition` map, which [`@icon-sheets/kit`](./packages/kit)
+writes out (or the Nuxt module carries in memory). The runtime never holds a collection and
 does no alias resolution: it looks a name up and returns the stored icon.
 
 The contract is carried in the types, so icon names autocomplete and typos
@@ -144,14 +158,15 @@ as a new contract.
 | Directory                        | Contents                                                                                            |
 | -------------------------------- | --------------------------------------------------------------------------------------------------- |
 | [`packages`](./packages)         | The library: the public [`icon-sheets`](./packages/icon-sheets) package and the internals behind it |
-| [`integrations`](./integrations) | Build and framework bridges — the `@icon-sheets/iconify` generator and the Nuxt module              |
+| [`integrations`](./integrations) | Build and framework bridges — `@icon-sheets/iconify` ref resolution and the Nuxt module             |
 | [`examples`](./examples)         | Consuming apps — a [Nuxt demo](./examples/nuxt) with runtime set switching                          |
 
 The internal packages: [`@icon-sheets/schema`](./packages/schema) (contract
 types and validation), [`@icon-sheets/core`](./packages/core) (runtime
 service), [`@icon-sheets/catalog`](./packages/catalog) (set
 discovery/retrieval), [`@icon-sheets/svg`](./packages/svg) (sprite renderer),
-and [`@icon-sheets/utils`](./packages/utils) (data helpers). Shared type
+[`@icon-sheets/utils`](./packages/utils) (data helpers), and
+[`@icon-sheets/kit`](./packages/kit) (the `icon-sheets build` generator). Shared type
 guards and object helpers come from the standalone
 [`objectively`](https://www.npmjs.com/package/objectively) package.
 
