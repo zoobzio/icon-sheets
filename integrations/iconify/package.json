@@ -1,7 +1,7 @@
 {
   "name": "@icon-sheets/iconify",
-  "version": "0.0.4",
-  "description": "Iconify ref resolution for icon-sheets \u2014 resolves Iconify references into validated contracts and sets",
+  "version": "0.0.5",
+  "description": "Iconify ref resolution for icon-sheets — resolves Iconify references into validated contracts and sets",
   "license": "MIT",
   "repository": {
     "type": "git",

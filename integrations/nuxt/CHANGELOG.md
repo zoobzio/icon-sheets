@@ -1,5 +1,22 @@
 # @icon-sheets/nuxt
 
+## 0.0.5
+
+### Patch Changes
+
+- [#1](https://github.com/zoobzio/icon-sheets/pull/1) [`44bfc0b`](https://github.com/zoobzio/icon-sheets/commit/44bfc0b53b1efa4edaabde757ead2189a96ddb98) Thanks [@zoobzio](https://github.com/zoobzio)! - **Breaking:** a set's key under `iconSheets.sets` is now its id. Remove the
+  `id` field from each set — `sets: { sharp: { name: "Sharp", icons } }` — and
+  make sure the key is the id the set should be listed and retrieved under. A set
+  that still declares an `id` fails the build with a message naming it.
+
+  The module now resolves the contract and every set in one pass through
+  `resolveAll()`, so each Iconify collection is fetched once instead of once per
+  set.
+
+- Updated dependencies [[`40cd6b0`](https://github.com/zoobzio/icon-sheets/commit/40cd6b0c4f25f3131143ada7c78d3b36b31bd56f)]:
+  - @icon-sheets/iconify@0.0.5
+  - icon-sheets@0.0.5
+
 ## 0.0.4
 
 ### Patch Changes
