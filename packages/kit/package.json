@@ -1,7 +1,7 @@
 {
   "name": "@icon-sheets/kit",
-  "version": "0.0.3",
-  "description": "Preset builder for icon-sheets \u2014 turns one ref config into a publishable package of aliases, guard, contract, sets and sprites",
+  "version": "0.0.4",
+  "description": "Preset builder for icon-sheets — turns one ref config into a publishable package of aliases, guard, contract, sets and sprites",
   "license": "MIT",
   "repository": {
     "type": "git",
