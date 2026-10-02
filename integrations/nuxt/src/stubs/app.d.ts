@@ -4,7 +4,7 @@
  * Runtime hook signatures. Augmented by the icon-sheets runtime via
  * `declare module "#app"`.
  */
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type -- augmented by the runtime
+// oxlint-disable-next-line typescript/no-empty-object-type -- augmented by the runtime
 export interface RuntimeNuxtHooks {}
 
 /**

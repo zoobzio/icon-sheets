@@ -14,7 +14,8 @@ import plugin from "../../../src/runtime/server/sprite";
 /** Runs the plugin and returns the HTML the `render:html` hook prepended. */
 const render = async (): Promise<string> => {
   let handler:
-    ((html: { bodyPrepend: string[] }) => void | Promise<void>) | undefined;
+    | ((html: { bodyPrepend: string[] }) => void | Promise<void>)
+    | undefined;
   const nitroApp = {
     hooks: {
       hook: (_name: string, fn: typeof handler) => {

@@ -112,7 +112,8 @@ export type Enum<C extends Contract> = {
 
 /** The outcome of an {@link Inspect}: the narrowed value, or the issues. */
 export type Result<V> =
-  { success: true; data: V } | { success: false; issues: Issue[] };
+  | { success: true; data: V }
+  | { success: false; issues: Issue[] };
 
 /** Boolean type predicates per kind. */
 export type Check<C extends Contract> = {
