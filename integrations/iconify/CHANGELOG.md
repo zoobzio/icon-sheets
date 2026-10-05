@@ -1,5 +1,31 @@
 # @icon-sheets/iconify
 
+## 0.0.7
+
+### Patch Changes
+
+- [`007fbca`](https://github.com/zoobzio/icon-sheets/commit/007fbca3c57e9bc2d3ac929e900eba3184eb12c9) Thanks [@zoobzio](https://github.com/zoobzio)! - Local SVG files as icon refs.
+
+  A ref starting with `./` or `../` now names a local SVG file, relative to the
+  project root (`cwd`), alongside `prefix:name` and `$/host/path`:
+
+  ```ts
+  icons: { home: "lucide:house", logo: "./assets/logo.svg" },
+  ```
+
+  - **iconify:** a new `file` scheme. The SVG's `viewBox` becomes the icon's
+    geometry, root presentation attributes are kept, and ids are namespaced per
+    file so they cannot collide in a sprite. A file with no `viewBox` or with an
+    undeclared namespace (`xlink:href`, `inkscape:*`) is rejected; a missing file
+    is reported with the other unresolvable refs. `resolveAll` returns `sources`,
+    the absolute paths of the files read.
+  - **kit:** `resolveKit` returns those paths as `Kit.sources`.
+  - **nuxt:** a locally built config's SVG files join the watch list, so editing
+    one restarts dev.
+
+- Updated dependencies []:
+  - @icon-sheets/schema@0.0.7
+
 ## 0.0.6
 
 ### Patch Changes

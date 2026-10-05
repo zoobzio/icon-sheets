@@ -1,6 +1,6 @@
 {
   "name": "icon-sheets",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "Type-safe SVG sprite icons — resolved from Iconify at build time, swappable as whole sets at runtime",
   "license": "MIT",
   "repository": {
