@@ -18,8 +18,8 @@ export type Icons = Pick<Kit, "contract" | "sets" | "prefix">;
  * Loads the icons the module serves. With a `contract`, they are the documents
  * a kit build elsewhere generated, taken as passed. Without one, the app's own
  * kit config is built here through `@icon-sheets/kit` — nothing is written to
- * disk — and joins Nuxt's watch list, so editing it restarts dev and builds it
- * again.
+ * disk — and joins Nuxt's watch list along with every local SVG it names, so
+ * editing any of them restarts dev and builds it again.
  *
  * @param options - The module's configuration.
  * @param nuxt - The Nuxt instance, for the project root and the watch list.
@@ -38,8 +38,10 @@ export const loadIcons = async (
 
   const path = resolve(nuxt.options.rootDir, options.config ?? FILENAME);
   nuxt.options.watch.push(path);
-  return resolveKit(await loadConfig(path), {
+  const kit = await resolveKit(await loadConfig(path), {
     cwd: nuxt.options.rootDir,
     req: defineRequest(options),
   });
+  nuxt.options.watch.push(...kit.sources);
+  return kit;
 };

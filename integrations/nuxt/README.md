@@ -13,7 +13,8 @@ composable, and serves switchable sets through catalog routes.
 
 Add an `icon-sheets.config.ts` to the project root. Refs draw from local
 `@iconify-json/*` packages first, then the public Iconify API; a `$/host/path`
-ref fetches a single icon from a URL:
+ref fetches a single icon from a URL, and a `./path.svg` ref reads a local SVG
+relative to the project root (editing it restarts dev, like the config):
 
 ```ts
 // icon-sheets.config.ts

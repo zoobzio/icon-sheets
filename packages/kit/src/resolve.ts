@@ -19,7 +19,7 @@ const defined = (
  * Checks a config and resolves it into a {@link Kit} through
  * `@icon-sheets/iconify`: the contract and every set in one pass, so each
  * collection is acquired once however many sets draw from it. The only step
- * that reads the network or local `@iconify-json/*` packages. No filesystem
+ * that reads the network, local `@iconify-json/*` packages or local SVG files. No filesystem
  * writes — {@link generate} turns the result into files; a caller that wants
  * the documents themselves stops here.
  *

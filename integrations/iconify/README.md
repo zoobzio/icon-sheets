@@ -18,6 +18,10 @@ and it is the kit that calls into here; the Nuxt module goes through the kit.
   request per prefix) from the Iconify API.
 - `$/host/path` — a single icon fetched from `https://host/path`, which returns
   one `IconifyIcon` as JSON.
+- `./path.svg` (or `../path.svg`) — a local SVG file, relative to `cwd`. Its
+  `viewBox` becomes the icon's geometry, the root's `fill` / `stroke` / `style`
+  attributes are kept around the body, and every `id` is namespaced per file so
+  two files' gradients or clip paths cannot collide in one sprite.
 
 ## Programmatic
 
@@ -60,7 +64,7 @@ const { contract, sets } = await resolveAll({
 ## Boundaries
 
 - Resolution is scheme-keyed; `options.resolvers` overrides the built-in
-  `iconify` / `url` behaviour (a custom endpoint, an offline fixture).
+  `iconify` / `url` / `file` behaviour (a custom endpoint, an offline fixture).
 - Every unresolvable ref is collected and reported together, each as
   `alias → ref`.
 - `resolveSet` and `resolveAll` membership-check each set's ref keys against
@@ -68,5 +72,12 @@ const { contract, sets } = await resolveAll({
   contract declares.
 - The assembled document is validated through `@icon-sheets/schema` before it
   is returned; a failure there points at the offending ref.
-- `$/` responses are trusted, not sanitized — untrusted sources are a separate
-  concern.
+- `$/` responses and local SVGs are trusted, not sanitized or optimized —
+  untrusted sources are a separate concern. A local SVG must carry a `viewBox`
+  and be a plain export: a namespaced element or attribute (`xlink:href`,
+  `inkscape:*`) is rejected, because a sprite does not declare the namespace.
+  Hard-coded colours stay as drawn; use `currentColor` for an icon that should
+  follow the text colour.
+- A missing local file is reported with the other unresolvable refs.
+  `resolveAll` also returns `sources`, the absolute path of every local file
+  the refs name, for a caller that watches them.

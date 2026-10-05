@@ -5,11 +5,15 @@ import type { ParsedRef, RefEntry } from "./types";
 /** The URL scheme sigil: `$/host/path` fetches a single icon from a URL. */
 const URL_SIGIL = "$/";
 
+/** The file scheme sigils: `./path` or `../path` reads a local SVG file. */
+const FILE_SIGILS = ["./", "../"];
+
 /**
- * Parses one authored ref string into a {@link ParsedRef}. Two schemes:
- * `$/host/path` targets `https://host/path` (a single-icon JSON endpoint), and
- * `prefix:name` parses through Iconify's own `stringToIcon` into a collection
- * reference. An unparseable string throws, naming the alias and the ref, so a
+ * Parses one authored ref string into a {@link ParsedRef}. Three schemes:
+ * `$/host/path` targets `https://host/path` (a single-icon JSON endpoint),
+ * `./path` or `../path` names a local SVG file relative to the working
+ * directory, and `prefix:name` parses through Iconify's own `stringToIcon` into
+ * a collection reference. An unparseable string throws, naming the alias and the ref, so a
  * typo in the config points at exactly where.
  *
  * @param alias - The alias the ref binds, for error attribution.
@@ -26,10 +30,13 @@ export const parseRef = (alias: string, raw: string): ParsedRef => {
       );
     }
   }
+  if (FILE_SIGILS.some((sigil) => raw.startsWith(sigil))) {
+    return { scheme: "file", path: raw };
+  }
   const parsed = stringToIcon(raw);
   if (!parsed || !parsed.prefix || !parsed.name) {
     throw new Error(
-      `@icon-sheets/iconify: alias "${alias}" has an unparseable ref "${raw}" — expected "prefix:name" or "$/host/path"`,
+      `@icon-sheets/iconify: alias "${alias}" has an unparseable ref "${raw}" — expected "prefix:name", "$/host/path" or "./path.svg"`,
     );
   }
   return {

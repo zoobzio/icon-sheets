@@ -34,6 +34,7 @@ vi.mock("@icon-sheets/kit", () => ({
     sets: Object.values(sets),
     prefix: "kit-",
     outDir: "icons",
+    sources: ["/app/assets/logo.svg"],
   })),
 }));
 
@@ -147,9 +148,12 @@ describe("icon-sheets module", () => {
       );
     });
 
-    it("watches the kit config so an edit restarts dev", async () => {
+    it("watches the kit config and its local SVGs so an edit restarts dev", async () => {
       await mod.setup({}, nuxt);
-      expect(nuxt.options.watch).toEqual(["/app/icon-sheets.config.ts"]);
+      expect(nuxt.options.watch).toEqual([
+        "/app/icon-sheets.config.ts",
+        "/app/assets/logo.svg",
+      ]);
     });
 
     it("lets a load failure through", async () => {

@@ -1,4 +1,7 @@
-import { describe, expect, it } from "vitest";
+import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { afterEach, describe, expect, it } from "vitest";
 
 import type { IconifyIcon, IconifyJSON } from "@iconify/types";
 import { defineIconSheets } from "icon-sheets";
@@ -48,6 +51,25 @@ const stub = (): { req: Req; requested: string[] } => {
   return { req, requested };
 };
 
+const dirs: string[] = [];
+
+/** A temp working directory holding the given SVG files, keyed by relative path. */
+const project = async (files: Record<string, string>): Promise<string> => {
+  const dir = await mkdtemp(join(tmpdir(), "icon-sheets-iconify-"));
+  dirs.push(dir);
+  for (const [path, contents] of Object.entries(files)) {
+    await mkdir(join(dir, path, ".."), { recursive: true });
+    await writeFile(join(dir, path), contents);
+  }
+  return dir;
+};
+
+afterEach(async () => {
+  await Promise.all(
+    dirs.splice(0).map((dir) => rm(dir, { recursive: true, force: true })),
+  );
+});
+
 describe("parseRef / plan", () => {
   it("parses a prefix:name ref into an iconify reference", () => {
     expect(parseRef("home", "lucide:home")).toEqual({
@@ -64,6 +86,17 @@ describe("parseRef / plan", () => {
     if (parsed.scheme === "url") {
       expect(parsed.url.href).toBe("https://icons.example.test/star.json");
     }
+  });
+
+  it("parses a ./ or ../ ref into a file reference", () => {
+    expect(parseRef("logo", "./assets/logo.svg")).toEqual({
+      scheme: "file",
+      path: "./assets/logo.svg",
+    });
+    expect(parseRef("logo", "../shared/logo.svg")).toEqual({
+      scheme: "file",
+      path: "../shared/logo.svg",
+    });
   });
 
   it("throws on an unparseable ref, naming the alias", () => {
@@ -171,6 +204,112 @@ describe("resolveContract", () => {
   });
 });
 
+describe("file refs", () => {
+  const resolveFile = async (svg: string) => {
+    const cwd = await project({ "assets/logo.svg": svg });
+    const contract = await resolveContract({
+      config: { id: "a", name: "A", icons: { logo: "./assets/logo.svg" } },
+      cwd,
+    });
+    return contract.icons.logo;
+  };
+
+  it("reads a local SVG into an icon literal", async () => {
+    const icon = await resolveFile(
+      '<?xml version="1.0"?>\n<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 16"><path d="M1 1"/></svg>\n',
+    );
+    expect(icon).toEqual({
+      body: '<path d="M1 1"/>',
+      left: 0,
+      top: 0,
+      width: 32,
+      height: 16,
+    });
+  });
+
+  it("keeps the root's presentation attributes", async () => {
+    const icon = await resolveFile(
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M1 1"/></svg>',
+    );
+    expect(icon.body).toBe(
+      '<g fill="none" stroke="currentColor"><path d="M1 1"/></g>',
+    );
+  });
+
+  it("namespaces ids and their references, the same on every run", async () => {
+    const svg =
+      '<svg viewBox="0 0 24 24"><defs><linearGradient id="a"/><clipPath id="ab"/></defs>' +
+      '<path fill="url(#a)" clip-path="url(#ab)"/><use href="#a"/></svg>';
+    const icon = await resolveFile(svg);
+    const scope = /id="(i[0-9a-f]{8}-)a"/.exec(icon.body)?.[1];
+    expect(scope).toBeDefined();
+    expect(icon.body).toContain(`id="${scope}ab"`);
+    expect(icon.body).toContain(`fill="url(#${scope}a)"`);
+    expect(icon.body).toContain(`clip-path="url(#${scope}ab)"`);
+    expect(icon.body).toContain(`href="#${scope}a"`);
+    expect((await resolveFile(svg)).body).toBe(icon.body);
+  });
+
+  it("scopes two files' ids apart", async () => {
+    const svg = '<svg viewBox="0 0 24 24"><path id="a"/></svg>';
+    const cwd = await project({ "one.svg": svg, "two.svg": svg });
+    const { icons } = await resolveContract({
+      config: {
+        id: "a",
+        name: "A",
+        icons: { one: "./one.svg", two: "./two.svg" },
+      },
+      cwd,
+    });
+    expect(icons.one.body).not.toBe(icons.two.body);
+  });
+
+  it("collects a missing file as an unresolved ref", async () => {
+    const cwd = await project({});
+    await expect(
+      resolveContract({
+        config: { id: "a", name: "A", icons: { logo: "./nope.svg" } },
+        cwd,
+      }),
+    ).rejects.toThrow(/could not be resolved[\s\S]*logo → \.\/nope\.svg/);
+  });
+
+  it("rejects a file that is not an SVG", async () => {
+    await expect(resolveFile("<html></html>")).rejects.toThrow(
+      /\.\/assets\/logo\.svg is not an SVG/,
+    );
+  });
+
+  it("rejects an SVG without a viewBox", async () => {
+    await expect(
+      resolveFile('<svg width="24" height="24"><path/></svg>'),
+    ).rejects.toThrow(/no usable "viewBox"/);
+  });
+
+  it("rejects a namespace the sprite would leave unbound", async () => {
+    await expect(
+      resolveFile(
+        '<svg viewBox="0 0 24 24" xmlns:xlink="http://www.w3.org/1999/xlink"><use xlink:href="#a"/><sodipodi:namedview/></svg>',
+      ),
+    ).rejects.toThrow(/"sodipodi:", "xlink:" namespace/);
+  });
+
+  it("leaves xml: attributes and style declarations alone", async () => {
+    const icon = await resolveFile(
+      '<svg viewBox="0 0 24 24"><text xml:space="preserve" style="fill:red; stroke:blue ;">a</text></svg>',
+    );
+    expect(icon.body).toContain("xml:space");
+  });
+
+  it("lets a caller-supplied resolver override the file scheme", async () => {
+    const contract = await resolveContract({
+      config: { id: "a", name: "A", icons: { logo: "./logo.svg" } },
+      resolvers: { file: async () => ({ body: "<custom/>" }) },
+    });
+    expect(contract.icons.logo.body).toBe("<custom/>");
+  });
+});
+
 describe("resolveSet", () => {
   it("resolves a Set document under the given identity", async () => {
     const { req } = stub();
@@ -237,6 +376,33 @@ describe("resolveAll", () => {
     });
     expect(requested).toHaveLength(1);
     expect(requested[0]).toContain("icons=home,content-save,house");
+  });
+
+  it("reports each local file the refs name once, as an absolute path", async () => {
+    const svg = '<svg viewBox="0 0 24 24"><path/></svg>';
+    const cwd = await project({ "logo.svg": svg, "alt.svg": svg });
+    const { req } = stub();
+    const resolved = await resolveAll({
+      config: {
+        id: "app",
+        name: "App",
+        icons: { home: "mock:home", logo: "./logo.svg", mark: "./logo.svg" },
+      },
+      sets: [{ id: "alt", name: "Alt", icons: { logo: "./alt.svg" } }],
+      cwd,
+      req,
+    });
+    expect(resolved.sources).toEqual([
+      join(cwd, "logo.svg"),
+      join(cwd, "alt.svg"),
+    ]);
+    expect(resolved.sets).toEqual([
+      {
+        id: "alt",
+        name: "Alt",
+        icons: { logo: expect.objectContaining({ body: "<path/>" }) },
+      },
+    ]);
   });
 
   it("rejects a set that rebinds an alias the config does not declare", async () => {

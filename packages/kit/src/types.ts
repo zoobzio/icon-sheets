@@ -17,7 +17,10 @@ export type KitSet<A extends string = string> = Omit<Identity, "id"> & {
  * directory.
  */
 export type KitConfig<A extends string = string> = Identity & {
-  /** Each semantic alias mapped to its icon ref (`prefix:name` or `$/host/path`). */
+  /**
+   * Each semantic alias mapped to its icon ref: `prefix:name`, `$/host/path`,
+   * or `./path.svg` for a local SVG relative to the project root.
+   */
   icons: Record<A, string>;
 
   /**
@@ -43,13 +46,16 @@ export type KitConfig<A extends string = string> = Identity & {
  * The I/O and resolver hooks passed through to `@icon-sheets/iconify`.
  */
 export type GenerateOptions = {
-  /** Where local `@iconify-json/*` packages resolve from; defaults to `process.cwd()`. */
+  /**
+   * Where local `@iconify-json/*` packages resolve from, and what `./` file
+   * refs are relative to; defaults to `process.cwd()`.
+   */
   cwd?: string;
 
   /** The document loader every fetch passes through; defaults to plain `fetch`. */
   req?: Req;
 
-  /** Scheme resolvers merged over the built-in `iconify` / `url` ones. */
+  /** Scheme resolvers merged over the built-in `iconify` / `url` / `file` ones. */
   resolvers?: Record<string, SchemeResolver>;
 };
 
@@ -81,6 +87,12 @@ export type Kit = {
 
   /** The output directory, normalized and relative to the project root. */
   outDir: string;
+
+  /**
+   * The absolute path of every local SVG the config's `./` refs name — what a
+   * consumer watches to rebuild when one is edited.
+   */
+  sources: string[];
 };
 
 /** One emitted file, its path relative to the output directory. */

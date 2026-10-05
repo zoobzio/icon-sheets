@@ -32,6 +32,18 @@ export default defineConfig({
 });
 ```
 
+A ref starting with `./` or `../` is a local SVG file, relative to the project
+root — for a logo or any icon no collection carries:
+
+```ts
+icons: { home: "lucide:house", logo: "./assets/logo.svg" },
+```
+
+The file needs a `viewBox` and should be a plain export (no editor namespaces
+such as `inkscape:*` or `xlink:href`); it is used as drawn, so give it
+`currentColor` if it should follow the text colour. See
+[the ref grammar](../../integrations/iconify#ref-grammar) for the details.
+
 A set's key is its id: `solid` above is emitted as the Set document with
 `id: "solid"` and as `sprite.solid.svg`. The alias union is inferred from
 `icons`, so a set rebinding an alias the config does not declare is a type
@@ -138,8 +150,9 @@ an app, it finds `icon-sheets.config.ts` and builds it itself — no
 `{ outDir, files }` without writing anything; `writeOutput` writes them, and
 `build()` runs the whole CLI pipeline. `resolveKit(config, options)` stops one
 step earlier and returns the resolved documents themselves —
-`{ contract, sets, prefix, outDir }` — for a consumer that wants them in memory
-rather than as files.
+`{ contract, sets, prefix, outDir, sources }` — for a consumer that wants them
+in memory rather than as files. `sources` lists the local SVG files the config
+names, as absolute paths, for a consumer that watches them.
 
 A config that breaks the kit's rules throws `InvalidConfigError` before
 anything is resolved, carrying every problem as `issues`. `build()` throws

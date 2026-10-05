@@ -1,3 +1,5 @@
+import { resolve } from "node:path";
+
 import { SchemaError, defineSchema } from "@icon-sheets/schema";
 import type { Contract, Identity, Set } from "@icon-sheets/schema";
 
@@ -12,7 +14,13 @@ import type {
 } from "./types";
 import { assemble } from "./assemble";
 import { plan } from "./refs";
-import { acquire, iconifyResolver, request, urlResolver } from "./source";
+import {
+  acquire,
+  fileResolver,
+  iconifyResolver,
+  request,
+  urlResolver,
+} from "./source";
 
 /**
  * Runs a schema validation and re-frames any failure so each issue points at the
@@ -47,8 +55,8 @@ export const reframe = <T>(entries: RefEntry[], run: () => T): T => {
 
 // Acquires every collection the entries draw from — one batched request per
 // prefix, however many documents the entries span — and builds the run's
-// scheme-resolver map: the built-in iconify (over those collections) and url
-// resolvers, with any caller override merged on.
+// scheme-resolver map: the built-in iconify (over those collections), url and
+// file resolvers, with any caller override merged on.
 const prepare = async (
   entries: RefEntry[],
   options: SharedOptions,
@@ -62,8 +70,18 @@ const prepare = async (
   return {
     iconify: iconifyResolver(collections),
     url: urlResolver(req),
+    file: fileResolver(cwd),
     ...options.resolvers,
   };
+};
+
+// The absolute path of every local file the entries name, each once.
+const sources = (entries: RefEntry[], options: SharedOptions): string[] => {
+  const cwd = options.cwd ?? process.cwd();
+  const paths = entries.flatMap(({ parsed }) =>
+    parsed.scheme === "file" ? [resolve(cwd, parsed.path)] : [],
+  );
+  return [...new Set(paths)];
 };
 
 // A set may only rebind aliases the contract declares.
@@ -94,7 +112,7 @@ const assembleDocument = async (
 /**
  * Resolves a ref config into a validated {@link Contract}: parses the refs,
  * acquires the Iconify collections (batched, local-first with API fallback),
- * resolves each ref into an icon literal, and validates the assembled contract
+ * resolves each ref into an icon literal (reading any local SVG it names), and validates the assembled contract
  * through icon-sheets's own schema. Returns the object — writing it anywhere is
  * the caller's concern (`@icon-sheets/kit`, a framework module).
  *
@@ -145,15 +163,13 @@ export const resolveAll = async (
     return { identity, entries: plan(icons) };
   });
 
-  const resolvers = await prepare(
-    [...base, ...layers.flatMap((layer) => layer.entries)],
-    options,
-  );
+  const entries = [...base, ...layers.flatMap((layer) => layer.entries)];
+  const resolvers = await prepare(entries, options);
 
   const contract = await assembleDocument(identity, base, resolvers);
   const sets: Set[] = [];
   for (const layer of layers) {
     sets.push(await assembleDocument(layer.identity, layer.entries, resolvers));
   }
-  return { contract, sets };
+  return { contract, sets, sources: sources(entries, options) };
 };

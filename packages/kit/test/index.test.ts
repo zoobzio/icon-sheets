@@ -238,6 +238,23 @@ describe("resolveKit", () => {
     ]);
     expect(kit.prefix).toBe("ui-");
     expect(kit.outDir).toBe("icons");
+    expect(kit.sources).toEqual([]);
+  });
+
+  it("resolves a local SVG relative to cwd and reports it as a source", async () => {
+    const cwd = await temp();
+    await writeFile(
+      join(cwd, "logo.svg"),
+      '<svg viewBox="0 0 48 24"><path d="logo"/></svg>',
+    );
+    const local = { id: "x", name: "X", icons: { logo: "./logo.svg" } };
+    const kit = await resolveKit(local, { cwd, req: offline });
+    expect(kit.sources).toEqual([join(cwd, "logo.svg")]);
+
+    const built = await generate(local, { cwd, req: offline });
+    expect(file(built, "sprite.svg")).toContain(
+      '<symbol id="logo" viewBox="0 0 48 24"><path d="logo"/></symbol>',
+    );
   });
 
   it("settles the optional fields", async () => {

@@ -3,8 +3,9 @@ import type { Contract, IconifyIcon, Identity, Set } from "@icon-sheets/schema";
 /**
  * The authored ref config: the input to {@link resolveContract}. Identity plus an
  * `icons` map whose values are ref *strings* rather than icon literals —
- * `prefix:name` to draw from an Iconify collection, or `$/host/path` to fetch a
- * single icon from a URL. The build layer resolves every ref into an icon
+ * `prefix:name` to draw from an Iconify collection, `$/host/path` to fetch a
+ * single icon from a URL, or `./path.svg` to read a local SVG file. The build
+ * layer resolves every ref into an icon
  * literal; the contract it returns is the resolved form under the same identity.
  */
 export type RefConfig = Identity & {
@@ -15,12 +16,14 @@ export type RefConfig = Identity & {
 /**
  * A ref parsed into a resolvable shape, discriminated by scheme. `iconify` is a
  * `prefix:name` reference into an Iconify collection; `url` is a single icon
- * fetched from `https://host/path`. The scheme keys the resolver that turns it
- * into an icon literal.
+ * fetched from `https://host/path`; `file` is a local SVG, its `path` relative
+ * to the working directory. The scheme keys the resolver that turns it into an
+ * icon literal.
  */
 export type ParsedRef =
   | { scheme: "iconify"; provider: string; prefix: string; name: string }
-  | { scheme: "url"; url: URL };
+  | { scheme: "url"; url: URL }
+  | { scheme: "file"; path: string };
 
 /**
  * Resolves one parsed ref into an icon literal, or `null` when the ref names
@@ -28,7 +31,7 @@ export type ParsedRef =
  * hard failure — a malformed response, an unreachable endpoint — which aborts
  * generation rather than being collected. Keyed by scheme in
  * {@link SharedOptions.resolvers}, so a caller can override the built-in
- * `iconify` / `url` behaviour.
+ * `iconify` / `url` / `file` behaviour.
  */
 export type SchemeResolver = (ref: ParsedRef) => Promise<IconifyIcon | null>;
 
@@ -46,8 +49,9 @@ export type Req = (src: URL) => Promise<string>;
  */
 export type SharedOptions = {
   /**
-   * The working directory local `@iconify-json/*` package resolution runs from;
-   * defaults to the process working directory.
+   * The working directory local `@iconify-json/*` package resolution runs from,
+   * and `./` file refs are relative to; defaults to the process working
+   * directory.
    */
   cwd?: string;
 
@@ -56,7 +60,8 @@ export type SharedOptions = {
 
   /**
    * Scheme resolvers merged over the built-ins, so a caller can override the
-   * `iconify` or `url` resolution (a custom endpoint, an offline fixture).
+   * `iconify`, `url` or `file` resolution (a custom endpoint, an offline
+   * fixture).
    */
   resolvers?: Record<string, SchemeResolver>;
 };
@@ -105,12 +110,19 @@ export type ResolveAllOptions = SharedOptions & {
 };
 
 /**
- * What {@link resolveAll} returns: the resolved contract, and the resolved Set
- * documents in the order their refs were given.
+ * What {@link resolveAll} returns: the resolved contract, the resolved Set
+ * documents in the order their refs were given, and the local files the refs
+ * name.
  */
 export type Resolved = {
   contract: Contract;
   sets: Set[];
+
+  /**
+   * The absolute path of every local SVG a `./` ref names, each once — what a
+   * caller watches to rebuild when one is edited.
+   */
+  sources: string[];
 };
 
 /**

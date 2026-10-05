@@ -1,4 +1,13 @@
-import { getIconData, quicklyValidateIconSet } from "@iconify/utils";
+import { createHash } from "node:crypto";
+import { readFile } from "node:fs/promises";
+import { resolve } from "node:path";
+
+import {
+  convertParsedSVG,
+  getIconData,
+  parseSVGContent,
+  quicklyValidateIconSet,
+} from "@iconify/utils";
 import { loadCollectionFromFS } from "@iconify/utils/lib/loader/fs";
 import type { IconifyIcon, IconifyJSON } from "@iconify/types";
 
@@ -133,4 +142,89 @@ export const urlResolver =
       );
     }
     return value;
+  };
+
+/**
+ * Every namespace prefix an SVG body uses on an element or an attribute, bar
+ * the two XML binds by itself. Each needs an `xmlns:*` declaration, and the
+ * file's own went with its root element — so in a sprite they are unbound.
+ */
+const foreign = (body: string): string[] => {
+  const prefixes = [
+    ...body.matchAll(/<\/?([A-Za-z_][\w.-]*):/g),
+    ...body.matchAll(/\s([A-Za-z_][\w.-]*):[\w.-]+\s*=/g),
+  ].map((match) => match[1]);
+  return [...new Set(prefixes)].filter(
+    (prefix) => prefix !== "xml" && prefix !== "xmlns",
+  );
+};
+
+/**
+ * Namespaces every `id` an SVG body declares, and each reference to one
+ * (`url(#id)`, `href="#id"`, SMIL `id.event`), under `scope`. Every symbol of a
+ * sprite shares one document, so two files that both name a gradient `a` would
+ * otherwise paint each other's.
+ */
+const scoped = (body: string, scope: string): string => {
+  const ids = [...body.matchAll(/\sid="([^"]+)"/g)].map((match) =>
+    match[1].replace(/[.*+?^${}()|[\]\\]/g, "\\$&"),
+  );
+  if (ids.length === 0) {
+    return body;
+  }
+  return body.replace(
+    new RegExp(`([#;"])(${ids.join("|")})(["')]|\\.[a-z])`, "g"),
+    `$1${scope}$2$3`,
+  );
+};
+
+/**
+ * The `file`-scheme resolver: reads a local SVG relative to `cwd` and converts
+ * it into an icon literal — the root's `viewBox` becomes the geometry, its
+ * presentation attributes (`fill`, `stroke`, `style`) wrap the body. Ids are
+ * namespaced under a hash of the authored path, so the output is the same on
+ * every machine and every run. The file is otherwise taken as authored: nothing
+ * is optimized or sanitized. A missing file returns `null` for the
+ * collected-misses pass; a file that cannot make a symbol — not an SVG, no
+ * `viewBox`, an undeclared namespace — is a hard failure naming it.
+ *
+ * @param cwd - The directory file refs are relative to.
+ */
+export const fileResolver =
+  (cwd: string): SchemeResolver =>
+  async (ref) => {
+    if (ref.scheme !== "file") {
+      return null;
+    }
+    let content: string;
+    try {
+      content = await readFile(resolve(cwd, ref.path), "utf8");
+    } catch (error) {
+      if (object(error) && error.code === "ENOENT") {
+        return null;
+      }
+      throw error;
+    }
+    const parsed = parseSVGContent(content);
+    if (!parsed) {
+      throw new Error(`@icon-sheets/iconify: ${ref.path} is not an SVG`);
+    }
+    const icon = convertParsedSVG(parsed);
+    if (!icon) {
+      throw new Error(
+        `@icon-sheets/iconify: ${ref.path} has no usable "viewBox" on its <svg> element`,
+      );
+    }
+    const prefixes = foreign(icon.body);
+    if (prefixes.length > 0) {
+      throw new Error(
+        `@icon-sheets/iconify: ${ref.path} uses the ${prefixes
+          .map((prefix) => `"${prefix}:"`)
+          .join(
+            ", ",
+          )} namespace, which a sprite does not declare — export it as a plain SVG`,
+      );
+    }
+    const hash = createHash("sha1").update(ref.path).digest("hex").slice(0, 8);
+    return { ...icon, body: scoped(icon.body, `i${hash}-`) };
   };
