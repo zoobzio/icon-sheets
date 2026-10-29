@@ -31,10 +31,12 @@ async function choose(id: string) {
 
 <template>
   <main>
-    <h1>icon-sheets × Nuxt</h1>
+    <h1><Icon name="logo" /> icon-sheets × Nuxt</h1>
     <p>
       One semantic contract of icon aliases, rendered from an inline SVG sprite.
-      Pick a set to <code>apply</code> it — every
+      The icons come from the
+      <code>@icon-sheets/example-icons</code> package: Iconify icons and local
+      SVG files, built by the kit. Pick a set to <code>apply</code> it — every
       <code>&lt;use href="#alias"&gt;</code> stays the same, only the symbol
       body behind it swaps.
     </p>
@@ -87,6 +89,9 @@ main {
   padding: 0 1.5rem;
 }
 h1 {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
   margin-bottom: 0.25rem;
 }
 p {

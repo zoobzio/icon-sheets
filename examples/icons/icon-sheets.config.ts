@@ -1,12 +1,19 @@
 import { defineConfig } from "@icon-sheets/kit";
 
-// Icons are authored once, here, as Iconify refs; @icon-sheets/nuxt builds this
-// config through the kit. The base contract draws from Lucide; each set rebinds
-// the same aliases with another collection's icons.
+// The icons of the examples, authored once as refs. Most aliases draw from
+// Iconify collections; `logo` and `badge` are local SVGs in src/. The base
+// contract draws from Lucide, and each set rebinds the same aliases with
+// another collection's icons. `logo` is bound only here, so every set keeps
+// it; the Material set rebinds `badge` to a second local file.
+//
+// `icon-sheets build` resolves every ref into .dist/, and package.json
+// exports that build, so an app names this package as its preset.
 export default defineConfig({
   id: "lucide",
   name: "Lucide",
   icons: {
+    logo: "./src/logo.svg",
+    badge: "./src/badge.svg",
     home: "lucide:home",
     search: "lucide:search",
     settings: "lucide:settings",
@@ -20,6 +27,7 @@ export default defineConfig({
     material: {
       name: "Material Design",
       icons: {
+        badge: "./src/badge-flat.svg",
         home: "mdi:home",
         search: "mdi:magnify",
         settings: "mdi:cog",
@@ -57,4 +65,5 @@ export default defineConfig({
       },
     },
   },
+  outDir: ".dist",
 });

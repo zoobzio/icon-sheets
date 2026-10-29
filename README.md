@@ -166,11 +166,11 @@ as a new contract.
 
 ## Workspace
 
-| Directory                        | Contents                                                                                            |
-| -------------------------------- | --------------------------------------------------------------------------------------------------- |
-| [`packages`](./packages)         | The library: the public [`icon-sheets`](./packages/icon-sheets) package and the internals behind it |
-| [`integrations`](./integrations) | Framework bridges — the Nuxt module                                                                 |
-| [`examples`](./examples)         | Consuming apps — a [Nuxt demo](./examples/nuxt) with runtime set switching                          |
+| Directory                        | Contents                                                                                                             |
+| -------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| [`packages`](./packages)         | The library: the public [`icon-sheets`](./packages/icon-sheets) package and the internals behind it                  |
+| [`integrations`](./integrations) | Framework bridges — the Nuxt module                                                                                  |
+| [`examples`](./examples)         | An [icons package](./examples/icons) and a [Nuxt demo](./examples/nuxt) that consumes it, with runtime set switching |
 
 The internal packages: [`@icon-sheets/schema`](./packages/schema) (contract
 types and validation), [`@icon-sheets/core`](./packages/core) (runtime

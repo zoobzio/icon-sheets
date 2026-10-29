@@ -9,16 +9,10 @@
     "preview": "nuxi preview"
   },
   "dependencies": {
+    "@icon-sheets/example-icons": "workspace:*",
     "@icon-sheets/nuxt": "workspace:*",
     "icon-sheets": "workspace:*",
     "nuxt": "catalog:",
     "vue": "catalog:"
-  },
-  "devDependencies": {
-    "@icon-sheets/kit": "workspace:*",
-    "@iconify-json/lucide": "catalog:",
-    "@iconify-json/mdi": "catalog:",
-    "@iconify-json/ph": "catalog:",
-    "@iconify-json/tabler": "catalog:"
   }
 }

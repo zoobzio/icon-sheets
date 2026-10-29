@@ -1,0 +1,44 @@
+{
+  "name": "@icon-sheets/example-icons",
+  "private": true,
+  "type": "module",
+  "files": [
+    ".dist"
+  ],
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./.dist/index.d.mts",
+      "import": "./.dist/index.mjs"
+    },
+    "./*.svg": "./.dist/*.svg",
+    "./*": {
+      "types": "./.dist/*.d.mts",
+      "import": "./.dist/*.mjs"
+    }
+  },
+  "scripts": {
+    "build": "icon-sheets build",
+    "stub": "icon-sheets build",
+    "lint": "oxlint",
+    "typecheck": "tsc --noEmit"
+  },
+  "peerDependencies": {
+    "icon-sheets": "workspace:*"
+  },
+  "peerDependenciesMeta": {
+    "icon-sheets": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@icon-sheets/kit": "workspace:*",
+    "@iconify-json/lucide": "catalog:",
+    "@iconify-json/mdi": "catalog:",
+    "@iconify-json/ph": "catalog:",
+    "@iconify-json/tabler": "catalog:",
+    "@types/node": "catalog:",
+    "icon-sheets": "workspace:*",
+    "typescript": "catalog:"
+  }
+}
