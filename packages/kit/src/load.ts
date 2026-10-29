@@ -1,13 +1,10 @@
 import { existsSync } from "node:fs";
 
 import { createJiti } from "jiti";
+import { object } from "objectively";
 
 import type { KitConfig } from "./types";
 import { MalformedConfigError, MissingConfigError } from "./error";
-
-/** Whether a value is a non-null object. */
-const object = (value: unknown): value is object =>
-  typeof value === "object" && value !== null;
 
 /**
  * Loads an `icon-sheets.config.ts` — or any TypeScript / JavaScript config

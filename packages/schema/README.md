@@ -9,6 +9,6 @@ boundary at runtime.
 
 This package deliberately does not model Iconify JSON collections (alias
 chains, inherited transforms); those exist only at build time, in
-[`@icon-sheets/iconify`](../../integrations/iconify).
+[`@icon-sheets/kit`](../kit).
 
 Internal package — consume it through [`icon-sheets`](../icon-sheets).

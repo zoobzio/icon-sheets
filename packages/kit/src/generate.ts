@@ -9,7 +9,7 @@ import { resolveKit } from "./resolve";
  * them. No filesystem writes.
  *
  * @param config - The kit config.
- * @param options - The I/O and resolver hooks passed to `@icon-sheets/iconify`.
+ * @param options - The I/O hooks ref resolution runs with.
  * @throws InvalidConfigError when the config breaks a rule, before resolving.
  */
 export const generate = async (

@@ -1,5 +1,4 @@
 import type { Contract, Identity, Set } from "@icon-sheets/schema";
-import type { Req, SchemeResolver } from "@icon-sheets/iconify";
 
 /**
  * A switchable set authored as refs: a name, optional discovery metadata, and a
@@ -71,7 +70,14 @@ export type KitConfig<
 };
 
 /**
- * The I/O and resolver hooks passed through to `@icon-sheets/iconify`.
+ * The document loader every fetch passes through — the seam for authenticated
+ * or offline sources. Receives the URL, returns the raw response text. Defaults
+ * to plain `fetch` (throwing on a non-OK status).
+ */
+export type Req = (src: URL) => Promise<string>;
+
+/**
+ * The I/O hooks ref resolution runs with.
  */
 export type GenerateOptions = {
   /**
@@ -82,12 +88,9 @@ export type GenerateOptions = {
 
   /** The document loader every fetch passes through; defaults to plain `fetch`. */
   req?: Req;
-
-  /** Scheme resolvers merged over the built-in `iconify` / `url` / `file` ones. */
-  resolvers?: Record<string, SchemeResolver>;
 };
 
-/** Options for {@link build}: the resolver hooks plus where the project lives. */
+/** Options for {@link build}: the I/O hooks plus where the project lives. */
 export type BuildOptions = Omit<GenerateOptions, "cwd"> & {
   /** The project root; defaults to `process.cwd()`. */
   root?: string;

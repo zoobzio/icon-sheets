@@ -12,7 +12,6 @@ import { pathToFileURL } from "node:url";
 import { afterEach, describe, expect, it } from "vitest";
 
 import type { IconifyJSON } from "@iconify/types";
-import type { Req } from "@icon-sheets/iconify";
 import { makeIconSheets } from "icon-sheets";
 import { useIconSheetsConfig } from "icon-sheets/config";
 
@@ -29,7 +28,7 @@ import {
 import { generate } from "../src/generate";
 import { loadPreset } from "../src/preset";
 import { resolveKit } from "../src/resolve";
-import type { KitConfig, Output } from "../src/types";
+import type { KitConfig, Output, Req } from "../src/types";
 import { writeOutput } from "../src/write";
 
 /**

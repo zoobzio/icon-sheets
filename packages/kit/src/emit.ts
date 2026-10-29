@@ -1,6 +1,6 @@
 import type { Kit, OutputFile } from "./types";
 import { renderBase, renderSet } from "./render";
-import { banner, json, pair, union } from "./source";
+import { banner, json, pair, union } from "./module";
 
 /**
  * The root entry: the alias list and its guard, the set ids, and the `href`

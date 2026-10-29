@@ -4,12 +4,10 @@ import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 
 import type { IconifyIcon, IconifyJSON } from "@iconify/types";
-import { defineIconSheets } from "icon-sheets";
-import { defineCatalog } from "@icon-sheets/catalog";
 
-import { resolveAll, resolveContract, resolveSet } from "../src/resolve";
 import { parseRef, plan } from "../src/refs";
-import type { Req } from "../src/types";
+import { resolveKit } from "../src/resolve";
+import type { KitConfig, Req } from "../src/types";
 
 /**
  * A mock collection served over the injected `req` — the Iconify-API path, since
@@ -53,9 +51,9 @@ const stub = (): { req: Req; requested: string[] } => {
 
 const dirs: string[] = [];
 
-/** A temp working directory holding the given SVG files, keyed by relative path. */
+/** A temp project root holding the given SVG files, keyed by relative path. */
 const project = async (files: Record<string, string>): Promise<string> => {
-  const dir = await mkdtemp(join(tmpdir(), "icon-sheets-iconify-"));
+  const dir = await mkdtemp(join(tmpdir(), "icon-sheets-resolve-"));
   dirs.push(dir);
   for (const [path, contents] of Object.entries(files)) {
     await mkdir(join(dir, path, ".."), { recursive: true });
@@ -68,6 +66,13 @@ afterEach(async () => {
   await Promise.all(
     dirs.splice(0).map((dir) => rm(dir, { recursive: true, force: true })),
   );
+});
+
+/** A config with the given icons and nothing else. */
+const only = (icons: Record<string, string>): KitConfig => ({
+  id: "a",
+  name: "A",
+  icons,
 });
 
 describe("parseRef / plan", () => {
@@ -109,18 +114,18 @@ describe("parseRef / plan", () => {
   });
 });
 
-describe("resolveContract", () => {
+describe("iconify refs", () => {
   it("resolves refs into a contract carrying the authored identity", async () => {
     const { req } = stub();
-    const contract = await resolveContract({
-      config: {
+    const { contract } = await resolveKit(
+      {
         id: "app",
         name: "App Icons",
         tags: ["ui"],
         icons: { home: "mock:home", save: "mock:content-save" },
       },
-      req,
-    });
+      { req },
+    );
     expect(contract.id).toBe("app");
     expect(contract.name).toBe("App Icons");
     expect(contract.tags).toEqual(["ui"]);
@@ -129,86 +134,61 @@ describe("resolveContract", () => {
     expect(contract.icons.home.width).toBe(24);
   });
 
-  it("batches acquisition into one request per prefix", async () => {
+  it("acquires a prefix once across the contract and every set", async () => {
     const { req, requested } = stub();
-    await resolveContract({
-      config: {
-        id: "app",
-        name: "App",
-        icons: { home: "mock:home", save: "mock:content-save" },
+    await resolveKit(
+      {
+        ...only({ home: "mock:home", save: "mock:content-save" }),
+        sets: {
+          sharp: { name: "Sharp", icons: { home: "mock:house" } },
+          flip: { name: "Flip", icons: { save: "mock:home" } },
+        },
       },
-      req,
-    });
+      { req },
+    );
     expect(requested).toHaveLength(1);
-    expect(requested[0]).toContain("icons=home,content-save");
+    expect(requested[0]).toContain("icons=home,content-save,house");
   });
 
   it("flattens an Iconify alias chain through getIconData", async () => {
     const { req } = stub();
-    const contract = await resolveContract({
-      config: { id: "a", name: "A", icons: { flipped: "mock:home-alias" } },
-      req,
-    });
+    const { contract } = await resolveKit(
+      only({ flipped: "mock:home-alias" }),
+      { req },
+    );
     expect(contract.icons.flipped.body).toBe("<house/>");
     expect(contract.icons.flipped.hFlip).toBe(true);
-  });
-
-  it("resolves a $/ ref, and throws a ref-attributed error on a bad response", async () => {
-    const { req } = stub();
-    const ok = await resolveContract({
-      config: {
-        id: "a",
-        name: "A",
-        icons: { star: "$/icons.example.test/star.json" },
-      },
-      req,
-    });
-    expect(ok.icons.star.body).toBe("<url-icon/>");
-
-    await expect(
-      resolveContract({
-        config: {
-          id: "a",
-          name: "A",
-          icons: { star: "$/icons.example.test/bad.json" },
-        },
-        req,
-      }),
-    ).rejects.toThrow(/did not return JSON/);
   });
 
   it("collects every unresolvable ref into one error", async () => {
     const { req } = stub();
     await expect(
-      resolveContract({
-        config: {
-          id: "a",
-          name: "A",
-          icons: { ghost: "mock:missing", wraith: "mock:absent" },
-        },
+      resolveKit(only({ ghost: "mock:missing", wraith: "mock:absent" }), {
         req,
       }),
     ).rejects.toThrow(/ghost → mock:missing[\s\S]*wraith → mock:absent/);
   });
+});
 
-  it("lets a caller-supplied resolver override a scheme", async () => {
-    const contract = await resolveContract({
-      config: {
-        id: "a",
-        name: "A",
-        icons: { star: "$/icons.example.test/star.json" },
-      },
-      resolvers: { url: async () => ({ body: "<custom-url/>" }) },
-    });
-    expect(contract.icons.star.body).toBe("<custom-url/>");
+describe("url refs", () => {
+  it("resolves a $/ ref, and throws a ref-attributed error on a bad response", async () => {
+    const { req } = stub();
+    const { contract } = await resolveKit(
+      only({ star: "$/icons.example.test/star.json" }),
+      { req },
+    );
+    expect(contract.icons.star.body).toBe("<url-icon/>");
+
+    await expect(
+      resolveKit(only({ star: "$/icons.example.test/bad.json" }), { req }),
+    ).rejects.toThrow(/did not return JSON/);
   });
 });
 
 describe("file refs", () => {
   const resolveFile = async (svg: string) => {
     const cwd = await project({ "assets/logo.svg": svg });
-    const contract = await resolveContract({
-      config: { id: "a", name: "A", icons: { logo: "./assets/logo.svg" } },
+    const { contract } = await resolveKit(only({ logo: "./assets/logo.svg" }), {
       cwd,
     });
     return contract.icons.logo;
@@ -253,24 +233,17 @@ describe("file refs", () => {
   it("scopes two files' ids apart", async () => {
     const svg = '<svg viewBox="0 0 24 24"><path id="a"/></svg>';
     const cwd = await project({ "one.svg": svg, "two.svg": svg });
-    const { icons } = await resolveContract({
-      config: {
-        id: "a",
-        name: "A",
-        icons: { one: "./one.svg", two: "./two.svg" },
-      },
-      cwd,
-    });
-    expect(icons.one.body).not.toBe(icons.two.body);
+    const { contract } = await resolveKit(
+      only({ one: "./one.svg", two: "./two.svg" }),
+      { cwd },
+    );
+    expect(contract.icons.one.body).not.toBe(contract.icons.two.body);
   });
 
   it("collects a missing file as an unresolved ref", async () => {
     const cwd = await project({});
     await expect(
-      resolveContract({
-        config: { id: "a", name: "A", icons: { logo: "./nope.svg" } },
-        cwd,
-      }),
+      resolveKit(only({ logo: "./nope.svg" }), { cwd }),
     ).rejects.toThrow(/could not be resolved[\s\S]*logo → \.\/nope\.svg/);
   });
 
@@ -301,178 +274,24 @@ describe("file refs", () => {
     expect(icon.body).toContain("xml:space");
   });
 
-  it("lets a caller-supplied resolver override the file scheme", async () => {
-    const contract = await resolveContract({
-      config: { id: "a", name: "A", icons: { logo: "./logo.svg" } },
-      resolvers: { file: async () => ({ body: "<custom/>" }) },
-    });
-    expect(contract.icons.logo.body).toBe("<custom/>");
-  });
-});
-
-describe("resolveSet", () => {
-  it("resolves a Set document under the given identity", async () => {
-    const { req } = stub();
-    const set = await resolveSet({
-      identity: { id: "sharp", name: "Sharp", tags: ["dense"] },
-      aliases: ["home", "save"],
-      icons: { home: "mock:content-save" },
-      req,
-    });
-    expect(set.id).toBe("sharp");
-    expect(set.tags).toEqual(["dense"]);
-    expect(set.icons?.home?.body).toBe("<rect/>");
-    expect(set.icons?.save).toBeUndefined();
-  });
-
-  it("rejects a ref key that is not one of the contract's aliases", async () => {
-    const { req } = stub();
-    await expect(
-      resolveSet({
-        identity: { id: "bad", name: "Bad" },
-        aliases: ["home"],
-        icons: { ghost: "mock:home" },
-        req,
-      }),
-    ).rejects.toThrow(/does not declare.*ghost/);
-  });
-});
-
-describe("resolveAll", () => {
-  const config = {
-    id: "app",
-    name: "App",
-    icons: { home: "mock:home", save: "mock:content-save" },
-  };
-  const sharp = {
-    id: "sharp",
-    name: "Sharp",
-    tags: ["dense"],
-    icons: { home: "mock:house" },
-  };
-
-  it("resolves the same documents as resolveContract and resolveSet", async () => {
-    const { req } = stub();
-    const resolved = await resolveAll({ config, sets: [sharp], req });
-
-    const { icons, ...identity } = sharp;
-    expect(resolved.contract).toEqual(await resolveContract({ config, req }));
-    expect(resolved.sets).toEqual([
-      await resolveSet({
-        identity,
-        aliases: Object.keys(config.icons),
-        icons,
-        req,
-      }),
-    ]);
-  });
-
-  it("acquires a prefix once across the contract and every set", async () => {
-    const { req, requested } = stub();
-    await resolveAll({
-      config,
-      sets: [sharp, { id: "flip", name: "Flip", icons: { save: "mock:home" } }],
-      req,
-    });
-    expect(requested).toHaveLength(1);
-    expect(requested[0]).toContain("icons=home,content-save,house");
-  });
-
   it("reports each local file the refs name once, as an absolute path", async () => {
     const svg = '<svg viewBox="0 0 24 24"><path/></svg>';
     const cwd = await project({ "logo.svg": svg, "alt.svg": svg });
     const { req } = stub();
-    const resolved = await resolveAll({
-      config: {
-        id: "app",
-        name: "App",
-        icons: { home: "mock:home", logo: "./logo.svg", mark: "./logo.svg" },
+    const kit = await resolveKit(
+      {
+        ...only({ home: "mock:home", logo: "./logo.svg", mark: "./logo.svg" }),
+        sets: { alt: { name: "Alt", icons: { logo: "./alt.svg" } } },
       },
-      sets: [{ id: "alt", name: "Alt", icons: { logo: "./alt.svg" } }],
-      cwd,
-      req,
-    });
-    expect(resolved.sources).toEqual([
-      join(cwd, "logo.svg"),
-      join(cwd, "alt.svg"),
-    ]);
-    expect(resolved.sets).toEqual([
+      { cwd, req },
+    );
+    expect(kit.sources).toEqual([join(cwd, "logo.svg"), join(cwd, "alt.svg")]);
+    expect(kit.sets).toEqual([
       {
         id: "alt",
         name: "Alt",
         icons: { logo: expect.objectContaining({ body: "<path/>" }) },
       },
     ]);
-  });
-
-  it("rejects a set that rebinds an alias the config does not declare", async () => {
-    const { req, requested } = stub();
-    await expect(
-      resolveAll({
-        config,
-        sets: [{ id: "bad", name: "Bad", icons: { ghost: "mock:home" } }],
-        req,
-      }),
-    ).rejects.toThrow(/does not declare.*ghost/);
-    expect(requested).toHaveLength(0);
-  });
-
-  it("admits an inherited alias a set rebinds, without resolving it", async () => {
-    const { req } = stub();
-    const resolved = await resolveAll({
-      config,
-      sets: [{ id: "alt", name: "Alt", icons: { ghost: "mock:home" } }],
-      aliases: ["ghost"],
-      req,
-    });
-    expect(resolved.contract.icons).not.toHaveProperty("ghost");
-    expect(resolved.sets[0]?.icons).toHaveProperty("ghost");
-  });
-});
-
-describe("round trip", () => {
-  it("resolveContract → resolveSet → serve through a catalog → apply → resolve", async () => {
-    const { req } = stub();
-    const contract = await resolveContract({
-      config: {
-        id: "app",
-        name: "App",
-        icons: { home: "mock:home", save: "mock:content-save" },
-      },
-      req,
-    });
-
-    const icons = defineIconSheets(contract);
-    expect(icons.aliases().sort()).toEqual(["home", "save"]);
-
-    // Resolve a set, serve it as JSON through an in-memory catalog provider.
-    const set = await resolveSet({
-      identity: { id: "sharp", name: "Sharp" },
-      aliases: icons.aliases(),
-      icons: { home: "mock:content-save" },
-      req,
-    });
-    const stored: unknown = JSON.parse(JSON.stringify(set));
-    const catalog = defineCatalog(icons.schema, {
-      list: () => ({ entries: [], total: 0, limit: 20, offset: 0 }),
-      get: (id) => (id === "sharp" ? stored : undefined),
-    });
-
-    const got = await catalog.get("sharp");
-    expect(got).toBeDefined();
-    if (!got) {
-      throw new Error("catalog missed the set it should have served");
-    }
-
-    icons.apply(got);
-    expect(icons.resolve("home").body).toBe("<rect/>");
-    // The set does not rebind save, so it falls through to the baseline.
-    expect(icons.resolve("save").body).toBe("<rect/>");
-
-    // reset / delta sanity on the applied contract.
-    icons.set("home", { body: "<edited/>" });
-    expect(Object.keys(icons.delta())).toEqual(["home"]);
-    icons.reset();
-    expect(icons.dirty()).toBe(false);
   });
 });

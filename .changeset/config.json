@@ -16,7 +16,6 @@
       "@icon-sheets/kit",
       "@icon-sheets/utils",
       "@icon-sheets/svg",
-      "@icon-sheets/iconify",
       "@icon-sheets/nuxt"
     ]
   ],

@@ -1,5 +1,4 @@
 ---
-"@icon-sheets/iconify": patch
 "@icon-sheets/kit": patch
 "@icon-sheets/nuxt": patch
 ---
@@ -19,5 +18,3 @@ Presets: compose a config over the kit builds of other packages.
   they compose farthest layer first. Passed documents and a local config land
   over the presets; with presets, the default config file is built only when
   it exists.
-- **iconify:** `resolveAll` takes `aliases`, further names a set may rebind
-  beyond the config's own.

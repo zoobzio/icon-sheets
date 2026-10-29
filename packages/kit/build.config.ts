@@ -5,11 +5,12 @@ export default defineBuildConfig({
   outDir: ".dist",
   declaration: true,
   externals: [
-    "@icon-sheets/iconify",
     "@icon-sheets/schema",
     "@icon-sheets/svg",
     "@icon-sheets/utils",
+    "@iconify/utils",
     "jiti",
+    "objectively",
   ],
   rollup: {
     emitCJS: false,

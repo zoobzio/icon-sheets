@@ -113,11 +113,11 @@ another config can compose over that package with `extends` — see
 
 icon-sheets separates the **source** — Iconify JSON collections, with their
 alias chains and inherited transforms — from the **contract** the runtime
-carries. The build layer ([`@icon-sheets/iconify`](./integrations/iconify))
-resolves each authored reference through the Iconify spec once — flattening
-alias chains, merging transforms, baking in collection defaults — into a flat
-`alias → icon definition` map, which [`@icon-sheets/kit`](./packages/kit)
-writes out (or the Nuxt module carries in memory). The runtime never holds a collection and
+carries. The build layer ([`@icon-sheets/kit`](./packages/kit)) resolves each
+authored reference through the Iconify spec once — flattening alias chains,
+merging transforms, baking in collection defaults — into a flat
+`alias → icon definition` map, and writes it out (or the Nuxt module carries it
+in memory). The runtime never holds a collection and
 does no alias resolution: it looks a name up and returns the stored icon.
 
 The contract is carried in the types, so icon names autocomplete and typos
@@ -169,7 +169,7 @@ as a new contract.
 | Directory                        | Contents                                                                                            |
 | -------------------------------- | --------------------------------------------------------------------------------------------------- |
 | [`packages`](./packages)         | The library: the public [`icon-sheets`](./packages/icon-sheets) package and the internals behind it |
-| [`integrations`](./integrations) | Build and framework bridges — `@icon-sheets/iconify` ref resolution and the Nuxt module             |
+| [`integrations`](./integrations) | Framework bridges — the Nuxt module                                                                 |
 | [`examples`](./examples)         | Consuming apps — a [Nuxt demo](./examples/nuxt) with runtime set switching                          |
 
 The internal packages: [`@icon-sheets/schema`](./packages/schema) (contract

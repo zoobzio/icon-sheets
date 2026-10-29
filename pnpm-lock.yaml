@@ -145,31 +145,6 @@ importers:
         specifier: 'catalog:'
         version: 1.2.37
 
-  integrations/iconify:
-    dependencies:
-      '@icon-sheets/schema':
-        specifier: workspace:*
-        version: link:../../packages/schema
-      '@iconify/types':
-        specifier: 'catalog:'
-        version: 2.0.0
-      '@iconify/utils':
-        specifier: 'catalog:'
-        version: 3.1.4
-      objectively:
-        specifier: 'catalog:'
-        version: 0.1.1
-    devDependencies:
-      '@icon-sheets/catalog':
-        specifier: workspace:*
-        version: link:../../packages/catalog
-      '@types/node':
-        specifier: 'catalog:'
-        version: 25.9.5
-      icon-sheets:
-        specifier: workspace:*
-        version: link:../../packages/icon-sheets
-
   integrations/nuxt:
     dependencies:
       '@icon-sheets/kit':
@@ -245,9 +220,6 @@ importers:
 
   packages/kit:
     dependencies:
-      '@icon-sheets/iconify':
-        specifier: workspace:*
-        version: link:../../integrations/iconify
       '@icon-sheets/schema':
         specifier: workspace:*
         version: link:../schema
@@ -257,9 +229,15 @@ importers:
       '@icon-sheets/utils':
         specifier: workspace:*
         version: link:../utils
+      '@iconify/utils':
+        specifier: 'catalog:'
+        version: 3.1.4
       jiti:
         specifier: 'catalog:'
         version: 2.7.0
+      objectively:
+        specifier: 'catalog:'
+        version: 0.1.1
     devDependencies:
       '@iconify/types':
         specifier: 'catalog:'

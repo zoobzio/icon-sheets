@@ -4,7 +4,7 @@ import type { IconifyIcon } from "@iconify/types";
 // a flat map of resolved icon definition literals in Iconify format, so this is
 // the one spec type the runtime contract is built from. The IconifyJSON
 // collection format — the *source* documents — belongs to the build layer
-// (`@icon-sheets/iconify`), never the runtime, so it is not re-exported here.
+// (`@icon-sheets/kit`), never the runtime, so it is not re-exported here.
 export type { IconifyIcon };
 
 /**

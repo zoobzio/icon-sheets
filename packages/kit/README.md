@@ -9,9 +9,9 @@ Iconify refs, plus any switchable sets — becomes modules that work both ways:
 - **At runtime:** load the contract into the icon-sheets service and `apply`
   the sets.
 
-Resolution goes through [`@icon-sheets/iconify`](../../integrations/iconify):
-refs come from local `@iconify-json/*` packages when installed, else from the
-Iconify API.
+Resolution happens here, once: Iconify refs come from local `@iconify-json/*`
+packages when installed, else from the Iconify API, with alias chains flattened
+and transforms merged into each icon, so the runtime carries none of it.
 
 ## Config
 
@@ -42,7 +42,30 @@ icons: { home: "lucide:house", logo: "./assets/logo.svg" },
 The file needs a `viewBox` and should be a plain export (no editor namespaces
 such as `inkscape:*` or `xlink:href`); it is used as drawn, so give it
 `currentColor` if it should follow the text colour. See
-[the ref grammar](../../integrations/iconify#ref-grammar) for the details.
+[the ref grammar](#ref-grammar) for the details.
+
+### Ref grammar
+
+- `prefix:name` — an icon from an Iconify collection. Resolved from a local
+  `@iconify-json/{prefix}` package when installed, else fetched (batched, one
+  request per prefix across the config and every set) from the Iconify API.
+- `$/host/path` — a single icon fetched from `https://host/path`, which returns
+  one `IconifyIcon` as JSON.
+- `./path.svg` (or `../path.svg`) — a local SVG file, relative to the project
+  root. Its `viewBox` becomes the icon's geometry, the root's `fill` /
+  `stroke` / `style` attributes are kept around the body, and every `id` is
+  namespaced per file so two files' gradients or clip paths cannot collide in
+  one sprite.
+
+Every ref that cannot be resolved is reported together, each as
+`alias → ref`, and a missing local file is reported with them. `$/` responses
+and local SVGs are trusted, not sanitized or optimized. A local SVG must be a
+plain export: a namespaced element or attribute (`xlink:href`, `inkscape:*`)
+is rejected, because a sprite does not declare the namespace. Each resolved
+document is validated through `@icon-sheets/schema`; a failure there points at
+the offending ref.
+
+### Sets
 
 A set's key is its id: `solid` above is emitted as the Set document with
 `id: "solid"` and as `sprite.solid.svg`. The alias union is inferred from
@@ -189,12 +212,13 @@ modules in `nuxt.config` and pass them as `iconSheets`.
 
 ## Programmatic
 
-`generate(config, { cwd, req, resolvers })` resolves and returns
+`generate(config, { cwd, req })` resolves and returns
 `{ outDir, files }` without writing anything; `writeOutput` writes them, and
 `build()` runs the whole CLI pipeline. `resolveKit(config, options)` stops one
 step earlier and returns the resolved documents themselves —
 `{ contract, sets, prefix, outDir, sources }` — for a consumer that wants them
-in memory rather than as files. `sources` lists the local SVG files the config
+in memory rather than as files. `req` intercepts every fetch — the seam for
+authenticated or offline sources; it defaults to plain `fetch`. `sources` lists the local SVG files the config
 names, as absolute paths, for a consumer that watches them.
 
 `loadPreset(name, root)` reads the documents a package exports —

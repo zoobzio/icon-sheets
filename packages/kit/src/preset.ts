@@ -3,13 +3,10 @@ import { join } from "node:path";
 import type { Contract, Schema, Set } from "@icon-sheets/schema";
 import { SchemaError, defineSchema } from "@icon-sheets/schema";
 import { createJiti } from "jiti";
+import { object } from "objectively";
 
 import type { Documents, Preset } from "./types";
 import { InvalidConfigError, MalformedPresetError } from "./error";
-
-/** Whether a value is a non-null object. */
-const object = (value: unknown): value is Record<string, unknown> =>
-  typeof value === "object" && value !== null;
 
 /** The package name an `extends` entry carries. */
 const named = (entry: string | Preset): string =>
