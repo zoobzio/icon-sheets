@@ -1,4 +1,11 @@
-import { mkdtemp, readFile, readdir, rm, writeFile } from "node:fs/promises";
+import {
+  mkdir,
+  mkdtemp,
+  readFile,
+  readdir,
+  rm,
+  writeFile,
+} from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { pathToFileURL } from "node:url";
@@ -10,14 +17,17 @@ import { makeIconSheets } from "icon-sheets";
 import { useIconSheetsConfig } from "icon-sheets/config";
 
 import { build } from "../src/build";
-import { defineConfig } from "../src/config";
+import { compose } from "../src/compose";
+import { defineConfig, preset } from "../src/config";
 import { MANIFEST } from "../src/constant";
 import {
   InvalidConfigError,
   MalformedConfigError,
+  MalformedPresetError,
   MissingConfigError,
 } from "../src/error";
 import { generate } from "../src/generate";
+import { loadPreset } from "../src/preset";
 import { resolveKit } from "../src/resolve";
 import type { KitConfig, Output } from "../src/types";
 import { writeOutput } from "../src/write";
@@ -77,6 +87,44 @@ afterEach(async () => {
   await Promise.all(
     dirs.splice(0).map((dir) => rm(dir, { recursive: true, force: true })),
   );
+});
+
+/**
+ * Publishes a kit build as a package under `<root>/node_modules/<name>`, with
+ * the `exports` the kit README prescribes, so a config at `root` can extend
+ * it as an installed package.
+ */
+const publish = async (
+  root: string,
+  name: string,
+  config: KitConfig,
+): Promise<string> => {
+  const dir = join(root, "node_modules", name);
+  await mkdir(dir, { recursive: true });
+  await writeFile(
+    join(dir, "package.json"),
+    JSON.stringify({
+      name,
+      type: "module",
+      exports: {
+        ".": { import: "./icons/index.mjs" },
+        "./*.svg": "./icons/*.svg",
+        "./*": { import: "./icons/*.mjs" },
+      },
+    }),
+  );
+  await writeOutput(await generate(config, { req }), dir);
+  return dir;
+};
+
+/** The base contract a dependent config extends in the preset tests. */
+const foundation = defineConfig({
+  id: "foundation",
+  name: "Foundation",
+  icons: { home: "mock:home", close: "mock:close" },
+  sets: {
+    solid: { name: "Solid", icons: { home: "mock:home-solid" } },
+  },
 });
 
 describe("generate", () => {
@@ -213,7 +261,7 @@ describe("generate", () => {
       'alias "bad alias" may only contain letters, digits, "_", "-" and "."',
       'alias "worse/alias" may only contain letters, digits, "_", "-" and "."',
       'prefix "a b" may only contain letters, digits, "_", "-" and "."',
-      'set "x" rebinds "nope", an alias the config does not declare',
+      'set "x" rebinds "nope", an alias the config neither declares nor inherits',
       'outDir ".." must be a subdirectory of the project root',
     ]);
     expect((error as Error).message).toContain(
@@ -269,6 +317,208 @@ describe("resolveKit", () => {
     await expect(
       resolveKit({ ...config, prefix: "a b" }, { req: offline }),
     ).rejects.toBeInstanceOf(InvalidConfigError);
+  });
+});
+
+describe("compose", () => {
+  const icon = (body: string) => ({ body, width: 24, height: 24 });
+  const base = {
+    contract: { id: "a", name: "A", icons: { home: icon("a-home") } },
+    sets: [{ id: "x", name: "X", icons: { home: icon("x-home") } }],
+    prefix: "a-",
+  };
+  const top = {
+    contract: {
+      id: "b",
+      name: "B",
+      icons: { home: icon("b-home"), save: icon("b-save") },
+    },
+    sets: [{ id: "x", name: "X2" }],
+  };
+
+  it("lays later icons over earlier ones under the last identity", () => {
+    const composed = compose([base, top]);
+    expect(composed.contract).toEqual({
+      id: "b",
+      name: "B",
+      icons: { home: icon("b-home"), save: icon("b-save") },
+    });
+  });
+
+  it("replaces a set by id and keeps the rest", () => {
+    const composed = compose([
+      base,
+      { ...top, sets: [{ id: "y", name: "Y" }] },
+    ]);
+    expect(composed.sets.map((set) => set.id)).toEqual(["x", "y"]);
+    expect(compose([base, top]).sets).toEqual([{ id: "x", name: "X2" }]);
+  });
+
+  it("takes the one prefix the layers set, or none", () => {
+    expect(compose([base, top]).prefix).toBe("a-");
+    expect(compose([{ ...base, prefix: undefined }, top]).prefix).toBe("");
+    expect(compose([base, { ...top, prefix: "a-" }]).prefix).toBe("a-");
+  });
+
+  it("rejects layers whose prefixes disagree", () => {
+    expect(() => compose([base, { ...top, prefix: "b-" }])).toThrow(
+      InvalidConfigError,
+    );
+  });
+
+  it("needs a layer", () => {
+    expect(() => compose([])).toThrow(/at least one layer/);
+  });
+});
+
+describe("loadPreset", () => {
+  it("reads the documents a published build exports", async () => {
+    const root = await temp();
+    await publish(root, "@acme/icons", { ...foundation, prefix: "acme-" });
+    const loaded = await loadPreset("@acme/icons", root);
+    expect(loaded.contract.id).toBe("foundation");
+    expect(Object.keys(loaded.contract.icons)).toEqual(["home", "close"]);
+    expect(loaded.sets.map((set) => set.id)).toEqual(["solid"]);
+    expect(loaded.prefix).toBe("acme-");
+  });
+
+  it("rejects a package that is not installed", async () => {
+    const root = await temp();
+    const error = await loadPreset("@acme/missing", root).catch((e) => e);
+    expect(error).toBeInstanceOf(MalformedPresetError);
+    expect((error as MalformedPresetError).package).toBe("@acme/missing");
+    expect((error as Error).message).toContain('"./config"');
+  });
+
+  it("rejects a package whose build is not contract-shaped", async () => {
+    const root = await temp();
+    const dir = await publish(root, "@acme/icons", foundation);
+    await writeFile(
+      join(dir, "icons", "config.mjs"),
+      "export const contract = { id: 'x', name: 'X', icons: { home: 1 } };",
+    );
+    await expect(loadPreset("@acme/icons", root)).rejects.toThrow(
+      /violate the schema/,
+    );
+    const other = await publish(root, "@acme/other", foundation);
+    await writeFile(
+      join(other, "icons", "config.mjs"),
+      "export const nope = 1;",
+    );
+    await expect(loadPreset("@acme/other", root)).rejects.toThrow(
+      /must export a contract/,
+    );
+  });
+});
+
+describe("extends", () => {
+  const dependent = defineConfig({
+    id: "app",
+    name: "App",
+    extends: ["@acme/icons"],
+    icons: { close: "mock:close", save: "mock:home" },
+  });
+
+  const project = async (): Promise<string> => {
+    const root = await temp();
+    await publish(root, "@acme/icons", foundation);
+    return root;
+  };
+
+  it("composes the config over the preset's resolved icons", async () => {
+    const cwd = await project();
+    const kit = await resolveKit(dependent, { cwd, req });
+    expect(kit.contract.id).toBe("app");
+    expect(Object.keys(kit.contract.icons)).toEqual(["home", "close", "save"]);
+    expect(kit.contract.icons.home.body).toBe('<path d="home"/>');
+    expect(kit.sets.map((set) => set.id)).toEqual(["solid"]);
+  });
+
+  it("fetches nothing for the preset's icons", async () => {
+    const cwd = await project();
+    const bare = { ...dependent, icons: {} };
+    const kit = await resolveKit(bare, { cwd, req: offline });
+    expect(Object.keys(kit.contract.icons)).toEqual(["home", "close"]);
+  });
+
+  it("lets a set rebind a preset alias, and replaces a preset set by id", async () => {
+    const cwd = await project();
+    const kit = await resolveKit(
+      {
+        ...dependent,
+        sets: {
+          solid: { name: "Mine", icons: { home: "mock:home-solid" } },
+          flip: { name: "Flip", icons: { close: "mock:home" } },
+        },
+      },
+      { cwd, req },
+    );
+    expect(kit.sets.map((set) => set.name)).toEqual(["Mine", "Flip"]);
+  });
+
+  it("still rejects a set that rebinds an unknown alias", async () => {
+    const cwd = await project();
+    await expect(
+      resolveKit(
+        {
+          ...dependent,
+          sets: { x: { name: "X", icons: { nope: "mock:home" } } },
+        },
+        { cwd, req: offline },
+      ),
+    ).rejects.toThrow(/neither declares nor inherits/);
+  });
+
+  it("inherits the preset's prefix and rejects a disagreeing one", async () => {
+    const cwd = await temp();
+    await publish(cwd, "@acme/icons", { ...foundation, prefix: "acme-" });
+    expect((await resolveKit(dependent, { cwd, req })).prefix).toBe("acme-");
+    expect(
+      (await resolveKit({ ...dependent, prefix: "acme-" }, { cwd, req }))
+        .prefix,
+    ).toBe("acme-");
+    await expect(
+      resolveKit({ ...dependent, prefix: "app-" }, { cwd, req }),
+    ).rejects.toThrow(/disagree/);
+  });
+
+  it("declares the inherited aliases in the emitted union and sprite", async () => {
+    const cwd = await project();
+    const built = await generate(dependent, { cwd, req });
+    expect(file(built, "index.d.mts")).toContain(
+      'export type Alias =\n  | "home"\n  | "close"\n  | "save";',
+    );
+    expect(file(built, "sprite.svg")).toContain('<symbol id="home"');
+    expect(file(built, "sprite.solid.svg")).toContain('d="home-solid"');
+  });
+
+  it("takes a typed preset entry the same as a name", async () => {
+    const cwd = await project();
+    const kit = await resolveKit(
+      { ...dependent, extends: [preset("@acme/icons")] },
+      { cwd, req },
+    );
+    expect(Object.keys(kit.contract.icons)).toContain("home");
+  });
+
+  it("rejects an entry that is not a package name before reading anything", async () => {
+    const cwd = await temp();
+    const error = await resolveKit(
+      { ...dependent, extends: ["", 3 as unknown as string] },
+      { cwd, req: offline },
+    ).catch((e) => e);
+    expect(error).toBeInstanceOf(InvalidConfigError);
+    expect((error as InvalidConfigError).issues).toEqual([
+      "extends[0] must be a package name",
+      "extends[1] must be a package name",
+    ]);
+  });
+
+  it("surfaces a preset that is not installed", async () => {
+    const cwd = await temp();
+    await expect(
+      resolveKit(dependent, { cwd, req: offline }),
+    ).rejects.toBeInstanceOf(MalformedPresetError);
   });
 });
 
@@ -445,6 +695,34 @@ describe("defineConfig", () => {
       icons: { home: "mock:home" },
       // @ts-expect-error — "nope" is not a declared alias
       sets: { x: { name: "X", icons: { nope: "mock:home" } } },
+    });
+  });
+
+  it("admits the aliases of a typed preset, and no others", () => {
+    defineConfig({
+      id: "ui",
+      name: "UI",
+      extends: [preset<"close" | "menu">("@acme/icons")],
+      icons: { home: "mock:home" },
+      sets: {
+        x: { name: "X", icons: { home: "mock:home", menu: "mock:home" } },
+      },
+    });
+    defineConfig({
+      id: "ui",
+      name: "UI",
+      extends: [preset<"close">("@acme/icons")],
+      icons: { home: "mock:home" },
+      // @ts-expect-error — "nope" is neither declared nor inherited
+      sets: { x: { name: "X", icons: { nope: "mock:home" } } },
+    });
+    defineConfig({
+      id: "ui",
+      name: "UI",
+      extends: ["@acme/icons"],
+      icons: { home: "mock:home" },
+      // @ts-expect-error — an untyped preset declares no aliases
+      sets: { x: { name: "X", icons: { close: "mock:home" } } },
     });
   });
 });

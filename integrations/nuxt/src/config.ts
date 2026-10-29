@@ -3,13 +3,27 @@ import type { IconSheetsConfig } from "icon-sheets/config";
 
 /**
  * The module's configuration. Icons are always authored as an
- * `@icon-sheets/kit` config; the module takes them one of two ways —
+ * `@icon-sheets/kit` config; the module takes them three ways, and composes
+ * them when more than one applies —
  *
+ * - **A preset.** Name a package that exports a kit build:
+ *
+ *   ```ts
+ *   export default defineNuxtConfig({
+ *     iconSheets: { preset: "@acme/icons" },
+ *   });
+ *   ```
+ *
+ *   Every Nuxt layer may name one. The module reads them farthest layer
+ *   first and lays each over the last, so an app's preset adds to a layer's
+ *   and rebinds what it declares again.
  * - **Built locally.** With no `contract`, the module loads the app's own
- *   `icon-sheets.config.ts` and resolves it through the kit at build time. No
- *   options are needed at all.
+ *   `icon-sheets.config.ts` and resolves it through the kit at build time,
+ *   over any presets. With presets, the default file is built only when it
+ *   exists; a `config` path is always built.
  * - **From a package.** Pass the documents the kit already generated — an
- *   icons package in a monorepo, or a published one:
+ *   icons package in a monorepo, or a published one — and they land over any
+ *   presets:
  *
  *   ```ts
  *   import { prefix } from "@acme/icons";
@@ -23,8 +37,17 @@ import type { IconSheetsConfig } from "icon-sheets/config";
  */
 export interface NuxtIconSheetsConfig extends Partial<IconSheetsConfig> {
   /**
+   * A package that exports a kit build — `./config`, `./sets` and a root
+   * `prefix` — resolved from the directory of the Nuxt layer that names it,
+   * so a layer's preset need not be a dependency of the app. Presets named
+   * across layers compose, farthest layer first.
+   */
+  preset?: string;
+
+  /**
    * The kit config to build from, relative to the project root. Defaults to
-   * `icon-sheets.config.ts`. Ignored when a `contract` is passed.
+   * `icon-sheets.config.ts`. Ignored when a `contract` is passed. Built over
+   * the presets when any are named.
    */
   config?: string;
 

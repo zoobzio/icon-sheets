@@ -61,6 +61,10 @@ const { contract, sets } = await resolveAll({
 });
 ```
 
+`aliases` admits further names a set may rebind: the aliases of a contract the
+caller composes the result over. They are not resolved here, only allowed past
+the membership check.
+
 ## Boundaries
 
 - Resolution is scheme-keyed; `options.resolvers` overrides the built-in

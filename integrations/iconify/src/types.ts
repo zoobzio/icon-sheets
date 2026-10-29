@@ -105,8 +105,18 @@ export type RefSet = Identity & {
 export type ResolveAllOptions = SharedOptions & {
   config: RefConfig;
 
-  /** The sets to resolve — every ref key must name one of the config's aliases. */
+  /**
+   * The sets to resolve — every ref key must name one of the config's aliases,
+   * or one of the inherited `aliases`.
+   */
   sets: RefSet[];
+
+  /**
+   * Aliases a set may rebind beyond the config's own: the aliases of a contract
+   * the config extends, which the caller composes the result over. Not resolved
+   * here — only admitted by the membership check.
+   */
+  aliases?: string[];
 };
 
 /**

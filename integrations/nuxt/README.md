@@ -46,10 +46,26 @@ file lives elsewhere.
 ### An icons package
 
 In a monorepo, or with a published icons package, the kit has already run.
-Pass its output instead:
+Name the package as a preset:
 
 ```ts
 // nuxt.config.ts
+export default defineNuxtConfig({
+  modules: ["@icon-sheets/nuxt"],
+  iconSheets: { preset: "@acme/icons" },
+});
+```
+
+A preset is any package whose `exports` point at a kit build — `./config`,
+`./sets` and the root `prefix` — as the kit README's
+[Publishing](../../packages/kit#publishing) shows. Nothing is built here: the
+module reads the resolved contract, sets and prefix as the kit wrote them.
+The package has to be built before Nuxt loads its config, and a running
+`nuxt dev` does not pick up a rebuilt package until it is restarted.
+
+The same documents can be passed by hand instead, imported in `nuxt.config`:
+
+```ts
 import { prefix } from "@acme/icons";
 import config from "@acme/icons/config";
 import sets from "@acme/icons/sets";
@@ -60,17 +76,50 @@ export default defineNuxtConfig({
 });
 ```
 
-Nothing is built here: the module takes the resolved contract, sets and prefix
-as given. The package has to be built before Nuxt loads its config, and a
-running `nuxt dev` does not pick up a rebuilt package until it is restarted.
+### Across layers
 
-| Option     | Contents                                                                       |
-| ---------- | ------------------------------------------------------------------------------ |
-| `config`   | The kit config to build, relative to the root. Default `icon-sheets.config.ts` |
-| `contract` | A resolved contract — the kit's `config` module. Replaces the local build      |
-| `sets`     | Resolved sets keyed by id — the kit's `sets` module. With `contract` only      |
-| `prefix`   | The symbol id prefix the kit built with. With `contract` only                  |
-| `catalog`  | A remote catalog to proxy to — see below                                       |
+Every Nuxt layer may name a `preset`, and each resolves from its own layer's
+directory — a layer's icons package need not be a dependency of the app. The
+module reads them farthest layer first and lays each over the last: the
+app's aliases join the layer's, an alias the app declares again is rebound,
+a set with the same id takes the layer's place, and the `Alias` union the app
+compiles against is the whole. A package named by more than one layer is
+read once.
+
+```ts
+// a design-system layer
+export default defineNuxtConfig({
+  modules: ["@icon-sheets/nuxt"],
+  iconSheets: { preset: "@acme/icons" },
+});
+
+// an app extending it
+export default defineNuxtConfig({
+  extends: ["@acme/nuxt"],
+  iconSheets: { preset: "@app/icons" }, // over @acme/icons
+});
+```
+
+Documents passed as `contract` / `sets` / `prefix` land over the presets the
+same way. So does the app's own `icon-sheets.config.ts`: with presets named,
+the default file is built only when it exists, and a `config` path is always
+built. A local config that sets no prefix inherits the presets'; one that
+sets a different prefix is rejected, since every layer shares one sprite.
+
+An icons package can also extend another in its own kit config, so the union
+is published once — see the kit's
+[Extending a package](../../packages/kit#extending-a-package). Either way
+composes the same documents; composing again over a preset the package
+already extends changes nothing.
+
+| Option     | Contents                                                                                          |
+| ---------- | ------------------------------------------------------------------------------------------------- |
+| `preset`   | A package that exports a kit build, resolved from the layer that names it. Composes across layers |
+| `config`   | The kit config to build, relative to the root. Default `icon-sheets.config.ts`                    |
+| `contract` | A resolved contract — the kit's `config` module. Replaces the local build                         |
+| `sets`     | Resolved sets keyed by id — the kit's `sets` module. With `contract` only                         |
+| `prefix`   | The symbol id prefix the kit built with. With `contract` only                                     |
+| `catalog`  | A remote catalog to proxy to — see below                                                          |
 
 Reference aliases by name — a typo fails to compile:
 
@@ -122,8 +171,9 @@ NUXT_ICON_SHEETS_TOKEN=sk_live_…
 
 ## How it works
 
-- **Build** — builds the local kit config (or takes the documents it was passed),
-  validates them, writes the contract to `#build/icon-sheets.mjs`, and derives
+- **Build** — reads each layer's preset, builds the local kit config (or takes
+  the documents it was passed) over them, validates the result, writes the
+  contract to `#build/icon-sheets.mjs`, and derives
   `Alias` into `#build/types/icon-sheets.d.ts`. Sets are written as JSON, mounted
   as nitro server assets, and served by the catalog routes; payloads never enter
   the app bundle.

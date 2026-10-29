@@ -6,8 +6,11 @@ import { OUT_DIR, TOKEN } from "./constant";
 import { InvalidConfigError } from "./error";
 import { inside, normalize } from "./path";
 
-/** One rule over a config: every issue it finds, none when the config passes. */
-type Rule = (config: KitConfig) => string[];
+/**
+ * One rule over a config: every issue it finds, none when the config passes.
+ * `inherited` lists the aliases of the presets the config extends.
+ */
+type Rule = (config: KitConfig, inherited: string[]) => string[];
 
 /** How every charset issue describes what {@link TOKEN} allows. */
 const ALLOWED = 'may only contain letters, digits, "_", "-" and "."';
@@ -50,9 +53,9 @@ const prefix: Rule = (config) => {
 /**
  * Each set's id — its key, and nothing else — names a sprite file and keys the
  * emitted sets; its identity holds to the schema; and it may only rebind
- * aliases the config declares. An entry left unset rebinds nothing.
+ * aliases the config declares or inherits. An entry left unset rebinds nothing.
  */
-const sets: Rule = (config) =>
+const sets: Rule = (config, inherited) =>
   Object.entries(config.sets ?? {}).flatMap(([id, set]) => {
     const at = `set ${JSON.stringify(id)}`;
     return [
@@ -62,11 +65,13 @@ const sets: Rule = (config) =>
       ...Object.entries(set.icons)
         .filter(
           ([alias, ref]) =>
-            ref !== undefined && !Object.hasOwn(config.icons, alias),
+            ref !== undefined &&
+            !Object.hasOwn(config.icons, alias) &&
+            !inherited.includes(alias),
         )
         .map(
           ([alias]) =>
-            `${at} rebinds ${JSON.stringify(alias)}, an alias the config does not declare`,
+            `${at} rebinds ${JSON.stringify(alias)}, an alias the config neither declares nor inherits`,
         ),
     ];
   });
@@ -86,11 +91,13 @@ const outDir: Rule = (config) => {
  * ref, and reports all of the issues together.
  *
  * @param config - The kit config.
+ * @param inherited - The aliases of the presets the config extends, which a
+ * set may rebind; none by default.
  * @throws InvalidConfigError carrying every issue, when there is any.
  */
-export const validate = (config: KitConfig): void => {
+export const validate = (config: KitConfig, inherited: string[] = []): void => {
   const issues = [identity, aliases, prefix, sets, outDir].flatMap((rule) =>
-    rule(config),
+    rule(config, inherited),
   );
   if (issues.length > 0) {
     throw new InvalidConfigError(issues);

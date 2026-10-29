@@ -1,6 +1,7 @@
+import type * as Kit from "@icon-sheets/kit";
 import type { NuxtIconSheetsConfig } from "../../src/config";
 
-import { mkdtemp, readFile, rm } from "node:fs/promises";
+import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
@@ -23,34 +24,60 @@ vi.mock("@nuxt/kit", () => ({
   ...kit,
 }));
 
-// The kit's own tests exercise loading and resolution; here both are stubbed so
-// the module's local build runs offline. `resolveKit` answers with the fixture
-// documents under a prefix, so a test can tell a local build from passed ones.
-vi.mock("@icon-sheets/kit", () => ({
-  FILENAME: "icon-sheets.config.ts",
+// The kit's own tests exercise loading, resolution and preset reading; here
+// they are stubbed so the module runs offline and touches no package.
+// `resolveKit` answers with the fixture documents under a prefix, so a test
+// can tell a local build from passed ones; `loadPreset` answers with a
+// contract named after the package, resolved from wherever it was asked.
+// `compose` is the kit's own.
+vi.mock("@icon-sheets/kit", async (importOriginal) => ({
+  ...(await importOriginal<typeof Kit>()),
   loadConfig: vi.fn(async () => authored),
-  resolveKit: vi.fn(async () => ({
+  resolveKit: vi.fn(async (config: { prefix?: string }) => ({
     contract: structuredClone(contract),
     sets: Object.values(sets),
-    prefix: "kit-",
+    prefix: config.prefix ?? "",
     outDir: "icons",
     sources: ["/app/assets/logo.svg"],
   })),
+  loadPreset: vi.fn(async (name: string) => ({
+    contract: {
+      id: name,
+      name,
+      icons: {
+        base: icon(`<path d="${name}"/>`),
+        home: icon(`<path d="${name}-home"/>`),
+      },
+    },
+    sets: [{ id: name, name, icons: { base: icon("<path/>") } }],
+    prefix: "",
+  })),
 }));
 
-import { loadConfig, resolveKit } from "@icon-sheets/kit";
+import { loadConfig, loadPreset, resolveKit } from "@icon-sheets/kit";
 import module from "../../src/module";
+
+const icon = (body: string) => ({ body, width: 24, height: 24 });
 
 /** The kit config the stubbed loader answers with. */
 const authored = {
   id: "app",
   name: "App Icons",
   icons: { home: "lucide:home" },
+  prefix: "kit-",
+};
+
+/** The same config with no prefix of its own, to inherit one. */
+const unprefixed = {
+  id: authored.id,
+  name: authored.name,
+  icons: authored.icons,
 };
 
 interface FakeNuxt {
   options: {
     rootDir: string;
+    _layers?: { cwd: string; config: { iconSheets?: NuxtIconSheetsConfig } }[];
     watch: string[];
     buildDir: string;
     nitro: { serverAssets?: { baseName: string; dir: string }[] };
@@ -175,6 +202,117 @@ describe("icon-sheets module", () => {
       } finally {
         delete process.env.NUXT_ICON_SHEETS_TOKEN;
       }
+    });
+  });
+
+  describe("given presets", () => {
+    const layers = (...named: [string, string | undefined][]) =>
+      named.map(([cwd, preset]) => ({
+        cwd,
+        config: preset === undefined ? {} : { iconSheets: { preset } },
+      }));
+
+    it("reads the preset from the root without building anything", async () => {
+      await mod.setup({ preset: "@acme/icons" }, nuxt);
+      expect(loadPreset).toHaveBeenCalledWith("@acme/icons", "/app");
+      expect(loadConfig).not.toHaveBeenCalled();
+      expect(resolveKit).not.toHaveBeenCalled();
+      expect(template("icon-sheets.mjs")!.getContents()).toContain(
+        '"id":"@acme/icons"',
+      );
+    });
+
+    it("reads each layer's preset from that layer, farthest first, once", async () => {
+      nuxt.options._layers = layers(
+        ["/app", "@app/icons"],
+        ["/layers/mid", undefined],
+        ["/layers/base", "@base/icons"],
+        ["/layers/dup", "@base/icons"],
+      );
+      await mod.setup({ preset: "@app/icons" }, nuxt);
+      expect(vi.mocked(loadPreset).mock.calls).toEqual([
+        ["@base/icons", "/layers/dup"],
+        ["@app/icons", "/app"],
+      ]);
+      const contents = template("icon-sheets.mjs")!.getContents();
+      expect(contents).toContain('"id":"@app/icons"');
+      expect(contents).toContain('d=\\"@app/icons-home\\"');
+      expect(contents).not.toContain('d=\\"@base/icons-home\\"');
+    });
+
+    it("lays passed documents over the presets", async () => {
+      nuxt.options._layers = layers(
+        ["/app", undefined],
+        ["/base", "@base/icons"],
+      );
+      await mod.setup(options, nuxt);
+      await build();
+      const contents = template("icon-sheets.mjs")!.getContents();
+      expect(contents).toContain('"id":"app"');
+      expect(contents).toContain('"base"');
+      expect(contents).toContain("M12 3 2 12h3v8h6v-6h2v6h6v-8h3z");
+      const payloads = JSON.parse(
+        await readFile(
+          join(nuxt.options.buildDir, "icon-sheets", "sets.json"),
+          "utf8",
+        ),
+      );
+      expect(Object.keys(payloads)).toEqual(["@base/icons", "sharp", "round"]);
+    });
+
+    it("skips a default config file that does not exist", async () => {
+      await mod.setup({ preset: "@acme/icons" }, nuxt);
+      expect(loadConfig).not.toHaveBeenCalled();
+      expect(nuxt.options.watch).toEqual([]);
+    });
+
+    it("builds the default config file over the presets when it exists", async () => {
+      nuxt.options.rootDir = nuxt.options.buildDir;
+      const path = join(nuxt.options.rootDir, "icon-sheets.config.ts");
+      await writeFile(path, "");
+      vi.mocked(loadConfig).mockResolvedValueOnce(unprefixed);
+      await mod.setup({ preset: "@acme/icons" }, nuxt);
+      expect(loadConfig).toHaveBeenCalledWith(path);
+      expect(nuxt.options.watch[0]).toBe(path);
+      const contents = template("icon-sheets.mjs")!.getContents();
+      expect(contents).toContain('"id":"app"');
+      expect(contents).toContain('"base"');
+    });
+
+    it("always builds a config it is pointed at", async () => {
+      vi.mocked(loadConfig).mockResolvedValueOnce(unprefixed);
+      await mod.setup({ preset: "@acme/icons", config: "icons.ts" }, nuxt);
+      expect(loadConfig).toHaveBeenCalledWith("/app/icons.ts");
+    });
+
+    it("lets a local build inherit the preset's prefix, or keep its own", async () => {
+      vi.mocked(loadConfig).mockResolvedValueOnce(unprefixed);
+      vi.mocked(loadPreset).mockResolvedValueOnce({
+        contract: { id: "p", name: "P", icons: {} },
+        sets: [],
+        prefix: "p-",
+      });
+      await mod.setup({ preset: "@acme/icons", config: "icons.ts" }, nuxt);
+      expect(template("icon-sheets.mjs")!.getContents()).toContain(
+        'export const prefix = "p-";',
+      );
+
+      vi.clearAllMocks();
+      vi.mocked(loadPreset).mockResolvedValueOnce({
+        contract: { id: "p", name: "P", icons: {} },
+        sets: [],
+        prefix: "p-",
+      });
+      await expect(
+        mod.setup({ preset: "@acme/icons", config: "icons.ts" }, nuxt),
+      ).rejects.toThrow(/disagree/);
+    });
+
+    it("lets a preset failure through", async () => {
+      vi.mocked(loadPreset).mockRejectedValueOnce(new Error("no build"));
+      await expect(mod.setup({ preset: "@acme/icons" }, nuxt)).rejects.toThrow(
+        /no build/,
+      );
     });
   });
 

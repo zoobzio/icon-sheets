@@ -148,7 +148,8 @@ export const resolveSet = async (options: ResolveSetOptions): Promise<Set> => {
  * {@link resolveContract} and {@link resolveSet} return, but with every ref
  * planned up front and the collections acquired once, so a prefix the contract
  * and several sets draw from costs one request rather than one per document.
- * Each set is membership-checked against the config's aliases.
+ * Each set is membership-checked against the config's aliases and any inherited
+ * `aliases`.
  *
  * @param options - The ref config, the ref sets, and the I/O and resolver hooks.
  */
@@ -156,7 +157,7 @@ export const resolveAll = async (
   options: ResolveAllOptions,
 ): Promise<Resolved> => {
   const { icons, ...identity } = options.config;
-  const aliases = Object.keys(icons);
+  const aliases = [...(options.aliases ?? []), ...Object.keys(icons)];
   const base = plan(icons);
   const layers = options.sets.map(({ icons, ...identity }) => {
     membership(aliases, icons);

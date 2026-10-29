@@ -416,6 +416,18 @@ describe("resolveAll", () => {
     ).rejects.toThrow(/does not declare.*ghost/);
     expect(requested).toHaveLength(0);
   });
+
+  it("admits an inherited alias a set rebinds, without resolving it", async () => {
+    const { req } = stub();
+    const resolved = await resolveAll({
+      config,
+      sets: [{ id: "alt", name: "Alt", icons: { ghost: "mock:home" } }],
+      aliases: ["ghost"],
+      req,
+    });
+    expect(resolved.contract.icons).not.toHaveProperty("ghost");
+    expect(resolved.sets[0]?.icons).toHaveProperty("ghost");
+  });
 });
 
 describe("round trip", () => {

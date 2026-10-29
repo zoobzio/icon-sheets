@@ -47,9 +47,11 @@ server-side so icons paint on first load, and registers the `<Icon>` component
 and the `useIconSheets()` composable. Any of the
 [200k+ open-source icons](https://icon-sets.iconify.design) published as
 `@iconify-json/*` packages are a valid source: references resolve from locally
-installed packages first, then fall back to the public Iconify API. See
-[`@icon-sheets/nuxt`](./integrations/nuxt) for switchable sets, consuming a
-shared icons package, remote catalogs, and auth.
+installed packages first, then fall back to the public Iconify API. A shared
+icons package is one option — `iconSheets: { preset: "@acme/icons" }` — and
+presets named across Nuxt layers compose. See
+[`@icon-sheets/nuxt`](./integrations/nuxt) for switchable sets, presets,
+remote catalogs, and auth.
 
 ## Outside a framework
 
@@ -103,7 +105,8 @@ sprite.sheet(); // the full <svg> sprite, for build-time or SSR
 sprite.href("home"); // "#home" — constant, whatever set is active
 ```
 
-The same output publishes as an icon package by pointing `exports` at it — see
+The same output publishes as an icon package by pointing `exports` at it, and
+another config can compose over that package with `extends` — see
 [`@icon-sheets/kit`](./packages/kit).
 
 ## How it works

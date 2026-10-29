@@ -59,6 +59,49 @@ reported together:
   set "solid" rebinds "nope", an alias the config does not declare
 ```
 
+## Extending a package
+
+A config can compose over the kit builds of other packages. Name them in
+`extends`; their resolved icons become the base, in order, and the config's
+own `icons` land on top:
+
+```ts
+import { defineConfig, preset } from "@icon-sheets/kit";
+import type { Alias as Foundation } from "@acme/icons";
+
+export default defineConfig({
+  id: "app",
+  name: "App",
+  extends: [preset<Foundation>("@acme/icons")],
+  icons: { logo: "./src/logo.svg", close: "mdi:close" }, // close rebinds @acme/icons's
+  sets: {
+    sharp: { name: "Sharp", icons: { prev: "mdi:chevron-left" } }, // a preset alias
+  },
+});
+```
+
+A preset is any package whose `exports` point at a kit build — `./config`,
+`./sets` and the root `prefix` — as in [Publishing](#publishing). It resolves
+from the project root, so it is a dependency of the package being built. The
+preset's documents are read as built: nothing of theirs is resolved again,
+and its `@iconify-json/*` packages are not needed here.
+
+The build keeps every preset alias left alone, rebinds one declared again,
+and emits the union — the `Alias` type, `isAlias`, the sheet and
+`sprite.svg` all carry the preset's icons with the config's own. A preset's
+sets come along; a set here with the same id takes its place. A set may
+rebind a preset's alias. `preset<Alias>(name)` carries the preset's alias
+union into the type check; a plain package name works the same at build
+time, but then a set may rebind only the config's own aliases without a
+type error.
+
+The prefix is inherited from the presets when the config sets none, so the
+preset's `href` helper and the composed sprite agree. A config that sets a
+different prefix is rejected.
+
+A package that cannot be resolved, or that does not export a kit build,
+raises `MalformedPresetError` carrying the package name.
+
 ## Build
 
 ```sh
@@ -138,11 +181,11 @@ icons.apply(sets.solid);
 
 ## With Nuxt
 
-[`@icon-sheets/nuxt`](../../integrations/nuxt) takes a kit config two ways. In
-an app, it finds `icon-sheets.config.ts` and builds it itself — no
-`icon-sheets build` step. For a shared icons package, import the generated
-`config`, `sets` and root modules in `nuxt.config` and pass them as
-`iconSheets`.
+[`@icon-sheets/nuxt`](../../integrations/nuxt) takes a kit config three ways.
+In an app, it finds `icon-sheets.config.ts` and builds it itself — no
+`icon-sheets build` step. For a shared icons package, name it as
+`iconSheets.preset`, or import the generated `config`, `sets` and root
+modules in `nuxt.config` and pass them as `iconSheets`.
 
 ## Programmatic
 
@@ -153,6 +196,13 @@ step earlier and returns the resolved documents themselves —
 `{ contract, sets, prefix, outDir, sources }` — for a consumer that wants them
 in memory rather than as files. `sources` lists the local SVG files the config
 names, as absolute paths, for a consumer that watches them.
+
+`loadPreset(name, root)` reads the documents a package exports —
+`{ contract, sets, prefix }` — resolving it from `root`, and
+`compose(layers)` lays such documents over each other the way `extends` does:
+later icons over earlier, sets replaced by id, the last identity, one agreed
+prefix. A framework module composes an app's icons over its layers' with the
+same two calls.
 
 A config that breaks the kit's rules throws `InvalidConfigError` before
 anything is resolved, carrying every problem as `issues`. `build()` throws

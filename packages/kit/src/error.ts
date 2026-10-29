@@ -45,3 +45,19 @@ export class InvalidConfigError extends Error {
     this.issues = issues;
   }
 }
+
+/**
+ * Raised when a package a config extends does not carry a kit build — it
+ * cannot be resolved from the project root, lacks a `./config`, `./sets` or
+ * root export, or exports something that is not contract-shaped. Carries the
+ * package `name`.
+ */
+export class MalformedPresetError extends Error {
+  readonly name = "MalformedPresetError";
+  readonly package: string;
+
+  constructor(name: string, reason: string, options?: { cause: unknown }) {
+    super(`@icon-sheets/kit: the preset "${name}" ${reason}`, options);
+    this.package = name;
+  }
+}
