@@ -1,0 +1,24 @@
+{
+  "$schema": "https://turborepo.dev/schema.json",
+  "agentGuidance": false,
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": [".dist/**"]
+    },
+    "@icon-sheets/example-nuxt#build": {
+      "dependsOn": ["^build"],
+      "outputs": [".output/**", ".nuxt/**"]
+    },
+    "stub": {
+      "dependsOn": ["^stub"],
+      "cache": false
+    },
+    "typecheck": {
+      "dependsOn": ["^build"]
+    },
+    "test": {
+      "dependsOn": ["^build"]
+    }
+  }
+}

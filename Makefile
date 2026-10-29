@@ -41,9 +41,9 @@ format: ## Format the repo with oxfmt
 inspect: ## Check formatting without writing (oxfmt --check)
 	pnpm inspect
 
-clean: ## Remove build output and example caches (.dist, .coverage, .nuxt)
-	rm -rf .coverage
-	find packages integrations presets -maxdepth 2 -name .dist -type d -prune -exec rm -rf {} +
+clean: ## Remove build output, caches, and example caches (.dist, .coverage, .turbo, .nuxt)
+	rm -rf .coverage .turbo
+	find $(wildcard packages integrations presets) -maxdepth 2 -name .dist -type d -prune -exec rm -rf {} +
 	find examples -maxdepth 2 \( -name .nuxt -o -name .output \) -type d -prune -exec rm -rf {} +
 
 check: lint typecheck test ## Run lint/typecheck/test against existing build output

@@ -24,6 +24,7 @@ catalog:
   objectively: "^0.1.1"
   oxfmt: "^0.71.0"
   oxlint: "^1.86.0"
+  turbo: "^2.11.7"
   typescript: "^6.0.3"
   unbuild: "^3.6.1"
   vitest: "^5.0.3"
