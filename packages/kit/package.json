@@ -18,10 +18,11 @@
     }
   },
   "bin": {
-    "icon-sheets": "./.dist/cli.mjs"
+    "icon-sheets": "./bin/icon-sheets.mjs"
   },
   "files": [
-    ".dist"
+    ".dist",
+    "bin"
   ],
   "scripts": {
     "build": "unbuild",
