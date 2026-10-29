@@ -1,5 +1,29 @@
 # @icon-sheets/nuxt
 
+## 0.0.8
+
+### Patch Changes
+
+- [`a56b822`](https://github.com/zoobzio/icon-sheets/commit/a56b822d143a34a0024db20d7dd97ab59081267b) Thanks [@zoobzio](https://github.com/zoobzio)! - Presets: compose a config over the kit builds of other packages.
+
+  - **kit:** `extends` in `icon-sheets.config.ts` names packages that export a
+    kit build (`./config`, `./sets`, root `prefix`). Their resolved icons become
+    the base, in order, and the config's own icons land on top; a set may rebind
+    a preset alias, and a set with a preset set's id takes its place. The prefix
+    is inherited when unset and a differing one is rejected. Nothing of a preset
+    is resolved again. `preset<Alias>(name)` types a preset's aliases for the
+    sets check. New `loadPreset`, `loadPresets`, `compose`, the `Documents` and
+    `Layer` types, and `MalformedPresetError`.
+  - **nuxt:** `iconSheets.preset` names a package that exports a kit build.
+    Every layer may name one; each resolves from its own layer's directory and
+    they compose farthest layer first. Passed documents and a local config land
+    over the presets; with presets, the default config file is built only when
+    it exists.
+
+- Updated dependencies [[`2d2b36e`](https://github.com/zoobzio/icon-sheets/commit/2d2b36edfe1870ddc9bdfd71da401414eb3133a4), [`a56b822`](https://github.com/zoobzio/icon-sheets/commit/a56b822d143a34a0024db20d7dd97ab59081267b)]:
+  - @icon-sheets/kit@0.0.8
+  - icon-sheets@0.0.8
+
 ## 0.0.7
 
 ### Patch Changes

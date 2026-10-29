@@ -1,5 +1,12 @@
 # @icon-sheets/svg
 
+## 0.0.8
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @icon-sheets/schema@0.0.8
+
 ## 0.0.7
 
 ### Patch Changes
