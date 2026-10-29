@@ -28,7 +28,7 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@iconify/types": "^2.0.0",
-    "objectively": "^0.1.1"
+    "@iconify/types": "catalog:",
+    "objectively": "catalog:"
   }
 }

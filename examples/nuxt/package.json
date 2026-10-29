@@ -11,14 +11,14 @@
   "dependencies": {
     "@icon-sheets/nuxt": "workspace:*",
     "icon-sheets": "workspace:*",
-    "nuxt": "^4.4.6",
-    "vue": "^3.5.35"
+    "nuxt": "catalog:",
+    "vue": "catalog:"
   },
   "devDependencies": {
     "@icon-sheets/kit": "workspace:*",
-    "@iconify-json/lucide": "^1",
-    "@iconify-json/mdi": "^1",
-    "@iconify-json/ph": "^1",
-    "@iconify-json/tabler": "^1"
+    "@iconify-json/lucide": "catalog:",
+    "@iconify-json/mdi": "catalog:",
+    "@iconify-json/ph": "catalog:",
+    "@iconify-json/tabler": "catalog:"
   }
 }

@@ -29,13 +29,13 @@
   },
   "dependencies": {
     "@icon-sheets/schema": "workspace:*",
-    "@iconify/types": "^2.0.0",
-    "@iconify/utils": "^3.1.4",
-    "objectively": "^0.1.1"
+    "@iconify/types": "catalog:",
+    "@iconify/utils": "catalog:",
+    "objectively": "catalog:"
   },
   "devDependencies": {
     "@icon-sheets/catalog": "workspace:*",
-    "@types/node": "^25.9.1",
+    "@types/node": "catalog:",
     "icon-sheets": "workspace:*"
   }
 }

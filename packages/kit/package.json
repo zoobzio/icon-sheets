@@ -35,11 +35,11 @@
     "@icon-sheets/schema": "workspace:*",
     "@icon-sheets/svg": "workspace:*",
     "@icon-sheets/utils": "workspace:*",
-    "jiti": "^2.7.0"
+    "jiti": "catalog:"
   },
   "devDependencies": {
-    "@iconify/types": "^2.0.0",
-    "@types/node": "^25.9.1",
+    "@iconify/types": "catalog:",
+    "@types/node": "catalog:",
     "icon-sheets": "workspace:*"
   }
 }

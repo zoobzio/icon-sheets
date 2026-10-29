@@ -29,6 +29,6 @@
   },
   "dependencies": {
     "@icon-sheets/schema": "workspace:*",
-    "objectively": "^0.1.1"
+    "objectively": "catalog:"
   }
 }

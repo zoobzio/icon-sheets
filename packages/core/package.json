@@ -30,6 +30,6 @@
   "dependencies": {
     "@icon-sheets/schema": "workspace:*",
     "@icon-sheets/utils": "workspace:*",
-    "objectively": "^0.1.1"
+    "objectively": "catalog:"
   }
 }
