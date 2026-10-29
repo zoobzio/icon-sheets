@@ -10,10 +10,13 @@
   "fixed": [
     [
       "icon-sheets",
+      "@icon-sheets/catalog",
       "@icon-sheets/core",
       "@icon-sheets/schema",
+      "@icon-sheets/kit",
       "@icon-sheets/utils",
       "@icon-sheets/svg",
+      "@icon-sheets/iconify",
       "@icon-sheets/nuxt"
     ]
   ],
